@@ -1,4 +1,4 @@
-hello:
-  label: Hello
-  permalink: /hello
-  description: Hello tag description
+announcement:
+  label: announcement
+  permalink: /announcement
+  description: Announcement tag description
