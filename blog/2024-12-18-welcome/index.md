@@ -25,6 +25,8 @@ In the rapidly evolving landscape of technology, staying up-to-date with the lat
 - **Linux Tips and Tricks**: Enhance your skills with guides and tutorials for managing Linux systems... and NixOS.
 - **Containerization Insights**: From Docker to Kubernetes, understand how to make the most of containerization technologies.
 
+<!-- truncate -->
+
 ## Join the Conversation
 
 This blog is not just about sharing knowledge; it's about building a community. We encourage you to engage in discussions, ask questions, and offer your insights. Together, we can stay ahead in this ever-changing field.

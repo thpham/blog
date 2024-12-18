@@ -2498,7 +2498,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/plugin-google-analytics@npm:3.6.3, @docusaurus/plugin-google-analytics@npm:^3.6.3":
+"@docusaurus/plugin-google-analytics@npm:3.6.3":
   version: 3.6.3
   resolution: "@docusaurus/plugin-google-analytics@npm:3.6.3"
   dependencies:
@@ -2513,7 +2513,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/plugin-google-gtag@npm:3.6.3":
+"@docusaurus/plugin-google-gtag@npm:3.6.3, @docusaurus/plugin-google-gtag@npm:^3.6.3":
   version: 3.6.3
   resolution: "@docusaurus/plugin-google-gtag@npm:3.6.3"
   dependencies:
@@ -4619,7 +4619,7 @@ __metadata:
   dependencies:
     "@docusaurus/core": "npm:3.6.3"
     "@docusaurus/module-type-aliases": "npm:3.6.3"
-    "@docusaurus/plugin-google-analytics": "npm:^3.6.3"
+    "@docusaurus/plugin-google-gtag": "npm:^3.6.3"
     "@docusaurus/preset-classic": "npm:3.6.3"
     "@docusaurus/theme-mermaid": "npm:^3.6.3"
     "@docusaurus/tsconfig": "npm:3.6.3"
