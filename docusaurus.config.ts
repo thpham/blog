@@ -80,17 +80,17 @@ const config: Config = {
         src: 'img/logo.svg',
       },
       items: [
-        {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
-        {to: '/blog', label: 'Blog', position: 'left'},
+        {to: '/blog', label: 'Posts', position: 'left'},
         {
           href: 'https://github.com/thpham/blog',
           label: 'GitHub',
           position: 'right',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'tutorialSidebar',
+          position: 'left',
+          label: 'Tutorials',
         },
       ],
     },
