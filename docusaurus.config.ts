@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'iThings blog',
+  title: 'iThings Blog',
   tagline: 'Cloud of many Things',
   favicon: 'img/favicon.ico',
 
