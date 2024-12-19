@@ -39,10 +39,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/thpham/blog/tree/main/packages/create-docusaurus/templates/shared/',
+          routeBasePath: '/learn',
         },
         blog: {
           showReadingTime: true,
@@ -50,10 +47,6 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/thpham/blog/tree/main/packages/create-docusaurus/templates/shared/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -74,38 +67,32 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'iThings blog',
+      title: 'iThings Blog',
       logo: {
-        alt: 'iThings blog',
-        src: 'img/logo.svg',
+        alt: 'iThings Blog',
+        src: 'img/logo.png',
       },
       items: [
         {to: '/blog', label: 'Posts', position: 'left'},
         {
-          href: 'https://github.com/thpham/blog',
-          label: 'GitHub',
-          position: 'right',
-        },
-        {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'learnSidebar',
           position: 'left',
-          label: 'Tutorials',
+          label: 'Learn',
         },
+        {to: '/about', label: 'About Me', position: 'right'},
       ],
     },
     footer: {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Learn',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Intro',
+              to: '/learn/intro',
             },
           ],
         },
@@ -123,12 +110,8 @@ const config: Config = {
           ],
         },
         {
-          title: 'More',
+          title: 'Projects',
           items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
             {
               label: 'GitHub',
               href: 'https://github.com/thpham',

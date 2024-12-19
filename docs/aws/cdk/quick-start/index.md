@@ -2,4 +2,4 @@
 sidebar_position: 1
 ---
 
-# Introduction
+# Quick Start - CDK v2
