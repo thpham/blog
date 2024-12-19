@@ -66,6 +66,9 @@ const config: Config = {
           trackingID: 'G-XC40J3CMRB',
           anonymizeIP: false,
         },
+        googleTagManager: {
+          containerId: 'GTM-WNKR52MW',
+        },
       } satisfies Preset.Options,
     ],
   ],
