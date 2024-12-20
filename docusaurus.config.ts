@@ -38,10 +38,15 @@ const config: Config = {
       'classic',
       {
         docs: {
+          path: "docs/notes",
+          routeBasePath: '/notes',
           sidebarPath: './sidebars.ts',
-          routeBasePath: '/learn',
+        },
+        pages: {
+          routeBasePath: '/', // The base path for routes.
         },
         blog: {
+          routeBasePath: '/blog',
           showReadingTime: true,
           feedOptions: {
             type: ['rss', 'atom'],
@@ -67,6 +72,11 @@ const config: Config = {
   ],
 
   themeConfig: {
+    colorMode: {
+      defaultMode: "dark",
+      disableSwitch: false,
+      respectPrefersColorScheme: true,
+    },
     navbar: {
       title: 'iThings Blog',
       logo: {
@@ -77,28 +87,44 @@ const config: Config = {
         {to: '/blog', label: 'Posts', position: 'left'},
         {
           type: 'docSidebar',
-          sidebarId: 'learnSidebar',
+          sidebarId: 'notesSidebar',
           position: 'left',
-          label: 'Learn',
-        },
-        {to: '/about', label: 'About Me', position: 'right'},
+          label: 'Notes',
+        }
       ],
     },
     footer: {
       style: 'dark',
       links: [
         {
-          title: 'Learn',
+          title: 'More',
           items: [
             {
-              label: 'Intro',
-              to: '/learn/intro',
+              label: 'Artificial Intelligence',
+              to: '/ai',
             },
           ],
         },
         {
-          title: 'Community',
+          title: 'Thomas-Kim Pham',
           items: [
+            {
+              label: 'About',
+              to: '/about',
+            },
+            {
+              label: 'Contact',
+              to: '/contact',
+            },
+          ],
+        },
+        {
+          title: 'Social Media',
+          items: [
+            {
+              label: 'GitHub',
+              href: 'https://github.com/thpham',
+            },
             {
               label: 'LinkedIn',
               href: 'https://www.linkedin.com/in/thpham/',
@@ -109,21 +135,13 @@ const config: Config = {
             },
           ],
         },
-        {
-          title: 'Projects',
-          items: [
-            {
-              label: 'GitHub',
-              href: 'https://github.com/thpham',
-            },
-          ],
-        },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} iThings.ch`,
+      copyright: `Copyright © ${new Date().getFullYear()} iThings.ch - All rights reserved.`,
     },
     prism: {
-      theme: prismThemes.vsLight,
-      darkTheme: prismThemes.vsDark,
+      theme: prismThemes.oneLight,
+      darkTheme: prismThemes.oneDark,
+      additionalLanguages: ["bash", "hcl", "yaml"],
     },
     liveCodeBlock: {
       /**
@@ -134,11 +152,53 @@ const config: Config = {
     },
   } satisfies Preset.ThemeConfig,
 
+  headTags: [
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'description',
+        content: 'Welcome to iThings.ch Blog - Your go-to source for tech tutorials and insights.',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'keywords',
+        content: 'tech tutorials insights, programming, software development, cloud computing, architecture, iot, iThings.ch',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'author',
+        content: 'Thomas-Kim Pham',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'robots',
+        content: 'index, follow',
+      },
+    },
+  ],
+
   markdown: {
     mermaid: true,
   },
   themes: [
     '@docusaurus/theme-mermaid',
+    [
+      '@easyops-cn/docusaurus-search-local',
+      {
+        hashed: true,
+        indexBlog: false,
+        docsRouteBasePath: '/notes',
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+        language: ['en'],
+      },
+    ],
   ],
 };
 

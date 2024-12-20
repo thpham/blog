@@ -1,12 +1,12 @@
 ---
-title: About Me
+title: About
 description: presentation
 hide_table_of_contents: true
 ---
 
 <img src="/img/me.jpg" width="20%" height="20%"></img>
 
-# About Me
+# About
 
 Welcome to my corner of the internet! I'm ***Thomas K. Pham***, a *Senior Cloud Platform Engineer* based in the picturesque town of Lausanne, Vaud, Switzerland. With over a decade of experience in cloud platforms ecosystem, I've honed my skills in designing, deploying, and maintaining scalable, secure, and efficient infrastructures.
 
