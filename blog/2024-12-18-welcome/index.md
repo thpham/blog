@@ -1,44 +1,40 @@
 ---
 slug: welcome
-title: Welcome
-description: Welcome to my new blog dedicated to Cloud, IaC, SRE, IoT, Linux, and Virtualization/Containerization!
+title: Welcome to iThings Blog
+description: A new blog dedicated to IaC, Containerization, Cloud, SRE/Platform, Linux, and IoT.
 authors: [thpham]
 tags: [announcement]
 ---
-
-# Welcome to my New Adventure!
 
 ![Welcome Image](welcome-banner.webp)
 
 Hello, tech enthusiasts!
 
-Welcome to what we hope will become your go-to resource for everything related to Cloud Computing, Infrastructure as Code (IaC), Site Reliability Engineering (SRE), the Internet of Things (IoT), Linux systems management, and the world of Virtualization and Containerization.
-
-## Why This Blog?
-
-In the rapidly evolving landscape of technology, staying up-to-date with the latest trends, tools, and best practices is crucial. This blog aims to be a comprehensive resource for both newbies and seasoned professionals. Here's a taste of what you can expect in the coming weeks and months:
-
-- **Deep Dives into Cloud Architectures**: Explore various cloud services, architectures, and strategies from AWS, Azure, Google Cloud, OCI and more.
-- **Mastering IaC**: Learn how to automate infrastructure with tools like Terraform, AWS CDK, and Ansible.
-- **SRE Best Practices**: Discover insights into Site Reliability Engineering, including monitoring, performance, and incident response.
-- **IoT Innovations**: Stay updated with the latest in IoT technology, from smart home solutions to industrial applications.
-- **Linux Tips and Tricks**: Enhance your skills with guides and tutorials for managing Linux systems... and NixOS.
-- **Containerization Insights**: From Docker to Kubernetes, understand how to make the most of containerization technologies.
+Welcome to my blog - your resource for everything **Infrastructure as Code**, **Containerization**, **Cloud Computing**, **Site Reliability Engineering**, , **Linux**, and **IoT**.
 
 <!-- truncate -->
 
+## Why This Blog?
+
+In the rapidly evolving landscape of technology, staying up-to-date with the latest trends, tools, and best practices is crucial. This blog aims to be a resource for both newcomers and seasoned professionals.
+
+Here's what you can expect:
+
+- **Infrastructure as Code** — Terraform, Crossplane, AWS CDK, and Ansible
+- **Containerization** — Docker, Kubernetes, Operators, and modern deployment strategies
+- **Cloud Infrastructure** — Deep dives into AWS, Azure, Google Cloud, OCI and more
+- **SRE & Platform Engineering** — Monitoring, observability, developer experience, and incident response
+- **Linux & NixOS** — Tips, tricks, and system management guides
+- **IoT Innovations** — From smart home solutions to industrial applications
+
 ## Join the Conversation
 
-This blog is not just about sharing knowledge; it's about building a community. We encourage you to engage in discussions, ask questions, and offer your insights. Together, we can stay ahead in this ever-changing field.
+This blog is not just about sharing knowledge; it's about building a community. I encourage you to engage in discussions, ask questions, and share your insights. Together, we can stay ahead in this ever-changing field.
 
-## Get Ready
+## Stay Updated
 
-Our first set of detailed tutorials and thought pieces will be dropping soon. Make sure you subscribe to my newsletter, follow us on social media, or simply bookmark this page to stay updated. We promise to keep the content as fresh, relevant, and useful as possible.
+Detailed tutorials and thought pieces will be dropping soon. Bookmark this page or follow me on social media to stay updated.
 
-## Let's Begin!
-
-Ready to embark on this journey with us? Stay tuned for updates, and enjoy this exciting ride through the realm of modern technology.
+Ready to embark on this journey? Let's go!
 
 Thank you for being part of this community from the beginning!
-
----

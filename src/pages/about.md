@@ -1,57 +1,57 @@
 ---
 title: About
-description: presentation
-hide_table_of_contents: true
+description: Senior Cloud Platform Engineer specializing in Kubernetes, DevOps, and scalable infrastructure
+hide_table_of_contents: false
 ---
 
-<img src="/img/me.jpg" width="20%" height="20%"></img>
+# Thomas K. Pham
 
-# About
+**Senior Cloud Platform Engineer** · Lausanne, Switzerland
 
-Welcome to my corner of the internet! I'm ***Thomas K. Pham***, a *Senior Cloud Platform Engineer* based in the picturesque town of Lausanne, Vaud, Switzerland. With over a decade of experience in cloud platforms ecosystem, I've honed my skills in designing, deploying, and maintaining scalable, secure, and efficient infrastructures.
+Building scalable, secure, and efficient cloud infrastructures for over a decade. Specializing in Kubernetes orchestration, platform engineering, and DevOps culture transformation.
 
-## Professional Journey
+---
 
-My career has been a thrilling ride through the ever-evolving landscape of cloud technology. Here are some highlights:
+## Core Expertise
 
-- **SICPA SA** (2019 - Present):  
-  As a Senior Cloud Platform Engineer in the Research & Innovation Department, I architect and manage innovative platforms and core infrastructure services, leveraging Kubernetes/OpenShift on private and public clouds, developer experience with the software factory, and operational scalability and security.
+`Kubernetes` `OpenShift` `Platform Engineering` `Infrastructure as Code` `DevOps` `Cloud Architecture` `CI/CD` `Container Orchestration` `SRE` `IoT`
 
-- **Bestmile SA** (2014 - 2019):  
-  Since the early stage of this startup company, I played a pivotal role as a Senior DevOps Engineer to scale up its cloud infrastructure and the IT operations, advocating for a DevOps culture with the developer community and usage of state-of-the-art cloud and container technologies.
+---
 
-- **GlassIG subs. RSD SA** (2014):  
-  Led a small DevOps team, assisting the Development & QA teams in developing a software automation strategy and contributing to the development of Managed Services and multi-tenant SaaS offerings.
+## Professional Experience
 
-- **Digimarc (formerly EVRYTHNG)** (2012 - 2013):  
-  As an Infrastructure Lead & Developer, I contributed to advancing **Internet of Things (IoT)** and **Web of Things (WoT)** initiatives. My work focused on connecting physical products to the digital world through scalable cloud infrastructure automation, developing REST APIs and microservices, and enabling product traceability with innovative solutions. This role showcased my passion for bridging technology and the physical world.
+**SICPA SA** · Senior Cloud Platform Engineer · Research & Innovation · 2019 – 2025
 
+- Architected and managed innovative platforms and core infrastructure services on Kubernetes/OpenShift across private and public clouds
+- Led developer experience initiatives through software factory improvements and tooling
+- Drove operational scalability and security practices across engineering teams
 
-For a more detailed overview of my professional experience, feel free to check out my [LinkedIn profile](https://www.linkedin.com/in/thpham).
+**Bestmile SA** · Senior DevOps Engineer · 2014 – 2019
 
-## Beyond the Keyboard
+- Joined at early stage and played a pivotal role scaling cloud infrastructure to support autonomous mobility platform growth
+- Championed DevOps culture adoption across development teams
+- Implemented state-of-the-art container technologies and cloud-native practices
 
-When I'm not immersed in cloud architectures, I indulge in a variety of hobbies that keep my life balanced and exciting:
+**GlassIG (RSD SA)** · DevOps Team Lead · 2014
 
-- **Skiing and Snowboarding**:  
-  Growing up amidst the Swiss Alps, I developed a passion for skiing and snowboarding, even competing in local competitions.
+- Led a small DevOps team supporting Development and QA with software automation strategies
+- Contributed to Managed Services and multi-tenant SaaS platform development
 
-- **Paragliding Adventures**:  
-  I once pursued a paragliding license until an unexpected encounter with a pine tree (yes, I literally fell into a sapin!) grounded my aerial aspirations.
+**Digimarc (formerly EVRYTHNG)** · Infrastructure Lead & Developer · 2012 – 2013
 
-- **Electronics and Home Automation**:  
-  I'm an avid tinkerer, often found soldering circuits and hacking together home automation systems to make everyday life a bit smarter.
+- Advanced Internet of Things (IoT) and Web of Things (WoT) initiatives connecting physical products to digital experiences
+- Built scalable cloud infrastructure automation and REST APIs for product traceability solutions
 
-- **Science Enthusiast**:  
-  A perpetual student of the sciences, I love exploring new concepts and staying updated with the latest technological advancements.
+→ [View full experience on LinkedIn](https://www.linkedin.com/in/thpham)
 
-## Let's Connect
+---
 
-I'm always eager to connect with like-minded individuals. Whether you're interested in cloud technologies, have a shared hobby, or just want to say hello, feel free to reach out:
+## Beyond Work
 
-- **GitHub**: [thpham](https://github.com/thpham)
-- **LinkedIn**: [thpham](https://www.linkedin.com/in/thpham)
-- **X**: [@ithingsch](https://x.com/ithingsch)
-- **Personal Website**: [blog.ithings.ch](http://blog.ithings.ch)
+Living in the Swiss Alps has shaped my interests: skiing and snowboarding competitively, a brief paragliding chapter (ended by an unplanned pine tree landing), and an ongoing passion for electronics and home automation projects. Always curious, always learning.
 
-Thanks for stopping by, and I look forward to connecting with you!
+---
+
+## Connect
+
+[GitHub](https://github.com/thpham) · [LinkedIn](https://www.linkedin.com/in/thpham) · [X](https://x.com/ithingsch)

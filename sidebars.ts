@@ -85,18 +85,24 @@ const sidebars: SidebarsConfig = {
     },
   ],
 
+/*
   aboutSidebar: [
     {
-      type: "link",
-      label: "About", // The link label
-      href: "/about", // The internal path
-    },
-    {
-      type: "link",
-      label: "Contact", // The link label
-      href: "/contact", // The internal path
-    },
+      type: "category",
+      label: "About",
+      collapsed: false,
+      collapsible: false,
+      link: {
+        type: "doc",
+        id: "about",
+      },
+      items: [
+        "about",
+        "contact"
+      ],
+    }
   ],
+*/
 };
 
 export default sidebars;

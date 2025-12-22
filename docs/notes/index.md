@@ -1,35 +1,9 @@
 ---
-title: Tech-Notes
-sidebar_label: Introduction
-keywords:
-  [
-    notes,
-    devops,
-    coding,
-    programming,
-    learning,
-    tech,
-    cloud,
-    engineering,
-    architecture,
-    infrastructure,
-    automation,
-    security,
-    performance,
-    efficiency,
-    productivity,
-    best practices,
-    tips and tricks,
-    tutorials,
-    guides,
-    resources,
-    documentation,
-    knowledge base,
-    reference materials,
-    learning materials,
-  ]
-slug: /
+title: Notes
+description: Technical notes and references
+slug: /notes
 ---
 
-# Tech-Notes
+# Notes
 
+Technical notes and references coming soon.
