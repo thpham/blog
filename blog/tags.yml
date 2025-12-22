@@ -2,3 +2,28 @@ announcement:
   label: announcement
   permalink: /announcement
   description: Announcement tag description
+
+nixos:
+  label: NixOS
+  permalink: /nixos
+  description: NixOS declarative Linux distribution
+
+firecracker:
+  label: Firecracker
+  permalink: /firecracker
+  description: Firecracker microVM technology
+
+ci-cd:
+  label: CI/CD
+  permalink: /ci-cd
+  description: Continuous Integration and Continuous Deployment
+
+github-actions:
+  label: GitHub Actions
+  permalink: /github-actions
+  description: GitHub Actions workflow automation
+
+infrastructure:
+  label: Infrastructure
+  permalink: /infrastructure
+  description: Infrastructure and platform engineering

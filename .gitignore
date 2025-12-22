@@ -62,3 +62,7 @@ Thumbs.db
 
 # Optional stylelint cache
 .stylelintcache
+
+# Blog drafts and Claude instructions (unversioned)
+/drafts/
+CLAUDE.md
