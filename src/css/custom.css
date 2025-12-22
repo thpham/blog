@@ -28,3 +28,18 @@
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* Footer styling - columns spread to edges */
+.footer .footer__links {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  justify-content: space-between !important;
+  padding: 0 15%;
+}
+
+.footer .footer__col {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: none !important;
+}
