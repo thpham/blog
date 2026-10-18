@@ -12,7 +12,8 @@ outcome: >-
   Yes. tools/logo/wordmark.py loads Instrument Sans, instantiates it at weight
   600, shapes the word "ithings" with HarfBuzz and outlines the glyphs; the two
   signal arcs are concentric circles centred on the tittle of the first "i",
-  measured in the font, and the tittle itself stays the font's own. The result
+  measured in the font; the dot is re-synthesized as a disc, its centre and
+  radius still measured from the font's own tittle. The result
   is the logo served at the top of this site — nothing in it was drawn by hand,
   and it can be regenerated at any weight without drifting off the letter's
   real geometry.
