@@ -25,7 +25,10 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        # The project's own playwright (1.64.0); the build renders the
+        # Mermaid and Excalidraw diagrams with it (node tools/excalidraw/export.mjs)
+        # before astro build (package.json: prebuild).
+        run: yarn playwright install --with-deps chromium
       - name: Build website
         run: yarn build
 
