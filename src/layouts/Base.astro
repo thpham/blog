@@ -111,7 +111,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, "\\u003c") : undefined;
     {ld && <script type="application/ld+json" set:html={ld} />}
   </head>
   <body {...bodyAttrs}>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main" lang="en">Skip to content</a>
     <Header />
     <main id="main" tabindex="-1">
       <slot />

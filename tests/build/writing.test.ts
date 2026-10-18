@@ -126,6 +126,29 @@ describe("writing list and static filters", () => {
   });
 });
 
+// <html lang> follows the content; the English interface around it must
+// declare itself English so that a French page does not read it as French.
+describe("English UI chrome keeps lang=\"en\"", () => {
+  const LANG_EN = /\blang="en"/;
+
+  it.each(["writing/welcome.html", "writing/lang/fr.html", "writing.html"])("%s", (p) => {
+    const html = page(distDir, p);
+    expect(html).toMatch(/<a[^>]*class="skip-link"[^>]*\blang="en"/);
+    expect(html).toMatch(/<header[^>]*class="site-header"[^>]*\blang="en"/);
+    expect(html).toMatch(/<footer[^>]*class="site-footer"[^>]*\blang="en"/);
+  });
+
+  it("marks the article's English labels (metadata, facts, rail, end matter)", () => {
+    const html = page(distDir, "writing/welcome.html");
+    for (const open of ['<p class="article-meta"', '<dl class="facts"', '<footer class="end"']) {
+      const tag = html.slice(html.indexOf(open), html.indexOf(">", html.indexOf(open)));
+      expect(tag, open).toMatch(LANG_EN);
+    }
+    // The rail (PocCard, TOC) only renders when there is something in it.
+    for (const m of html.matchAll(/<aside class="rail"[^>]*>/g)) expect(m[0]).toMatch(LANG_EN);
+  });
+});
+
 describe("with no writing at all (dist-nodemo)", () => {
   const pages = ["writing.html", "writing/lang/en.html", "writing/lang/fr.html", "horizon.html"];
 

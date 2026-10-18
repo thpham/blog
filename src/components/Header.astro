@@ -21,7 +21,7 @@ const within = (href: string) => path === href || path.startsWith(`${href}/`);
 const isCurrent = (href: string) => within(href) || (SUB_SECTIONS[href] ?? []).some(within);
 ---
 
-<header class="site-header">
+<header class="site-header" lang="en">
   <div class="wrap bar">
     <a class="home" href="/"><Wordmark /></a>
     <nav aria-label="Main">
