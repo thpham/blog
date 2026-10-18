@@ -1,9 +1,10 @@
 # Production
-/build
+dist/
+dist-nodemo/
 
 # Generated files
-.docusaurus
-.cache-loader
+.astro/
+*.excalidraw.*.svg
 
 
 # Node modules
