@@ -169,6 +169,12 @@ describe("reciprocity with the promoted article", () => {
   it("links back to the lab entry it came from", () => {
     expect(html).toContain('href="/lab/wordmark-from-font-geometry"');
   });
+
+  it("labels the link as a Lab entry and names it in the end matter", () => {
+    const end = region(html, '<footer class="end"', "footer");
+    expect(end).toMatch(/class="kind"[^>]*>Lab</);
+    expect(end).toMatch(/The wordmark from the font.{0,10}s own geometry/);
+  });
 });
 
 describe("with no lab at all (dist-nodemo)", () => {

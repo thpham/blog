@@ -98,3 +98,53 @@ describe("dist sanity", () => {
     expect(existsSync(join(distDir, "favicon.ico"))).toBe(false);
   });
 });
+
+// Static pages outside the collections: About, the Colophon and the 404.
+// They exist in both production builds (nodemo.test.ts asserts the latter).
+const noDemoDir = fileURLToPath(new URL("../../dist-nodemo", import.meta.url));
+
+describe("the static pages", () => {
+  const about = () => readFileSync(join(distDir, "about.html"), "utf-8");
+  const colophon = () => readFileSync(join(distDir, "colophon.html"), "utf-8");
+  const lost = () => readFileSync(join(distDir, "404.html"), "utf-8");
+
+  it("carry only English titles of the `<page> · ithings` shape", () => {
+    expect(about()).toContain("<title>About · ithings</title>");
+    expect(colophon()).toContain("<title>Colophon · ithings</title>");
+    expect(lost()).toContain("<title>Page not found · ithings</title>");
+  });
+
+  it("ship Person JSON-LD on About, with no claimed title or employer", () => {
+    const match = about().match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/);
+    expect(match).not.toBeNull();
+    const person = JSON.parse(match![1]);
+    expect(person["@type"]).toBe("Person");
+    expect(person.name).toBe("Thomas Pham");
+    expect(person.jobTitle).toBeUndefined();
+    expect(person.worksFor).toBeUndefined();
+    expect(about()).not.toMatch(/open to work|hire me/i);
+  });
+
+  it("state the colophon's facts: stack, logo recipe, isolines, pipeline", () => {
+    const html = colophon();
+    expect(html).toMatch(/Astro/);
+    expect(html).toMatch(/130\.0\/1000 em/);
+    expect(html).toMatch(/tools\/logo/);
+    expect(html).toMatch(/uvs?\s?run\s+--with fonttools --with uharfbuzz/);
+    expect(html).toMatch(/marching squares/i);
+    expect(html).toMatch(/GitHub Pages/);
+    expect(html).toMatch(/Pagefind/);
+  });
+
+  it("send a lost visitor to the home page and to Writing", () => {
+    expect(lost()).toContain('href="/"');
+    expect(lost()).toContain('href="/writing"');
+    expect(lost()).toMatch(/class="[^"]*\bdisplay\b/); // the display h1
+  });
+
+  it("build in the no-demo build too", () => {
+    for (const p of ["about.html", "colophon.html", "404.html"]) {
+      expect(existsSync(join(noDemoDir, p)), p).toBe(true);
+    }
+  });
+});

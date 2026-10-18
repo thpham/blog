@@ -1,0 +1,94 @@
+---
+/**
+ * About (spec §8, §12): the old about page transposed into the new frame.
+ * The profile states what Thomas works on, never a claimed position — no
+ * headline title, no jobTitle / worksFor, nothing is invented.
+ */
+import Page from "../layouts/Page.astro";
+import { personJsonLd } from "../lib/seo";
+import { SOCIAL_URLS } from "../lib/site";
+---
+
+<Page
+  title="About"
+  description="About Thomas Pham: platforms, connected things and the AI woven through both, from Lausanne."
+  eyebrow="About"
+  heading="Thomas Pham"
+  jsonLd={personJsonLd()}
+>
+  <p>
+    I build and run the infrastructure that products sit on — for more than a decade now, on
+    Kubernetes and OpenShift across private and public clouds, with the pipelines, platforms and
+    practices around them. I care about scalable, secure and efficient systems, and about the
+    developer experience of the people who have to live in them.
+  </p>
+
+  <h2>Core expertise</h2>
+
+  <p>
+    <code>Kubernetes</code> <code>OpenShift</code> <code>Platform Engineering</code> <code
+      >Infrastructure as Code</code
+    > <code>DevOps</code> <code>Cloud Architecture</code> <code>CI/CD</code> <code
+      >Container Orchestration</code
+    > <code>SRE</code> <code>IoT</code> <code>AI</code>
+  </p>
+
+  <h2>Professional experience</h2>
+
+  <h3>SICPA SA</h3>
+  <p class="meta">Senior Cloud Platform Engineer · Research &amp; Innovation · 2019 – 2025</p>
+  <ul>
+    <li>
+      Architected and managed innovative platforms and core infrastructure services on
+      Kubernetes/OpenShift across private and public clouds
+    </li>
+    <li>Led developer experience initiatives through software factory improvements and tooling</li>
+    <li>Drove operational scalability and security practices across engineering teams</li>
+  </ul>
+
+  <h3>Bestmile SA</h3>
+  <p class="meta">Senior DevOps Engineer · 2014 – 2019</p>
+  <ul>
+    <li>
+      Joined at an early stage and played a pivotal role scaling the cloud infrastructure behind an
+      autonomous mobility platform
+    </li>
+    <li>Championed DevOps culture adoption across development teams</li>
+    <li>Implemented state-of-the-art container technologies and cloud-native practices</li>
+  </ul>
+
+  <h3>GlassIG (RSD SA)</h3>
+  <p class="meta">DevOps Team Lead · 2014</p>
+  <ul>
+    <li>Led a small DevOps team supporting Development and QA with software automation strategies</li>
+    <li>Contributed to Managed Services and multi-tenant SaaS platform development</li>
+  </ul>
+
+  <h3>Digimarc (formerly EVRYTHNG)</h3>
+  <p class="meta">Infrastructure Lead &amp; Developer · 2012 – 2013</p>
+  <ul>
+    <li>
+      Advanced Internet of Things (IoT) and Web of Things (WoT) initiatives connecting physical
+      products to digital experiences
+    </li>
+    <li>Built scalable cloud infrastructure automation and REST APIs for product traceability</li>
+  </ul>
+
+  <p>The full history lives on <a href={SOCIAL_URLS.linkedin}>LinkedIn</a>.</p>
+
+  <h2>Beyond work</h2>
+
+  <p>
+    Living in the Swiss Alps has shaped my interests: skiing and snowboarding competitively, a brief
+    paragliding chapter (ended by an unplanned pine tree landing), and an ongoing passion for
+    electronics and home automation projects. Always curious, always learning.
+  </p>
+
+  <h2>Connect</h2>
+
+  <p>
+    <a href={SOCIAL_URLS.github}>GitHub</a> · <a href={SOCIAL_URLS.linkedin}>LinkedIn</a> · <a
+      href={SOCIAL_URLS.x}>X</a
+    >
+  </p>
+</Page>

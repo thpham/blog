@@ -16,6 +16,12 @@ const demo = demoUrls(fileURLToPath(new URL("./src/content", import.meta.url)));
 export default defineConfig({
   site: "https://blog.ithings.ch",
   trailingSlash: "never",
+  // The old Docusaurus routes stay alive: each is rebuilt as a static page
+  // that refreshes to its new address (spec §12 keeps old URLs working).
+  redirects: {
+    "/blog": "/writing",
+    "/blog/welcome": "/writing",
+  },
   // ITHINGS_SMOKE_OUT: a build test (tests/build/seo.test.ts) builds a
   // one-off site with a temporary entry, so it redirects the output away
   // from dist/ — the other build tests read dist/ concurrently.

@@ -18,13 +18,32 @@ function region(html: string, open: string, tag: string): string {
   return html.slice(start, end);
 }
 
-// Article pages. `building-this-site` joins this list in Task 11.
+// Article pages, demo content included: this is the set of shipped entries
+// while the site carries only demo content (rulings P2/P3).
 const ARTICLES = [
+  {
+    path: "writing/building-this-site.html",
+    lang: "en",
+    date: "2026-10-18",
+    topics: ["astro", "static-sites", "generative-design"],
+  },
+  {
+    path: "writing/agents-join-the-platform.html",
+    lang: "en",
+    date: "2026-10-15",
+    topics: ["platform-engineering", "ai"],
+  },
+  {
+    path: "writing/agents-et-plateformes.html",
+    lang: "fr",
+    date: "2026-10-15",
+    topics: ["ia", "plateformes"],
+  },
   {
     path: "writing/welcome.html",
     lang: "en",
     date: "2024-12-18",
-    topics: ["infrastructure-as-code", "kubernetes", "cloud", "platform-engineering", "nixos", "iot"],
+    topics: ["infrastructure-as-code", "kubernetes", "cloud", "platform-engineering", "ai", "linux", "nixos", "iot"],
   },
 ];
 
@@ -101,16 +120,18 @@ describe("writing list and static filters", () => {
     }
   });
 
-  it("always builds both language pages", () => {
+  it("always builds both language pages, each listing only its language", () => {
     expect(page(distDir, "writing/lang/en.html")).toContain('href="/writing/welcome"');
     const fr = page(distDir, "writing/lang/fr.html");
+    expect(fr).toContain('href="/writing/agents-et-plateformes"');
     expect(fr).not.toContain('href="/writing/welcome"');
-    expect(fr).toMatch(/class="empty/);
   });
 
-  it("builds a page for every topic", () => {
-    for (const slug of ARTICLES[0].topics) {
-      expect(page(distDir, `topics/${slug}.html`)).toContain('href="/writing/welcome"');
+  it("builds a page for every topic in use", () => {
+    for (const article of ARTICLES) {
+      for (const slug of article.topics) {
+        expect(page(distDir, `topics/${slug}.html`)).toContain(`href="/${article.path.replace(/\.html$/, "")}"`);
+      }
     }
   });
 
@@ -161,5 +182,97 @@ describe("with no writing at all (dist-nodemo)", () => {
   it("builds no article and no topic page", () => {
     expect(existsSync(join(noDemoDir, "writing/welcome.html"))).toBe(false);
     expect(existsSync(join(noDemoDir, "topics"))).toBe(false);
+  });
+});
+
+// The Article template's optional branches, exercised by the demo article
+// (the T5 coverage ruling: these must be pinned in the build, not left to
+// future real content).
+describe("the demo article's furniture (ruling T5)", () => {
+  const html = page(distDir, "writing/building-this-site.html");
+  const rail = region(html, '<aside class="rail"', "aside");
+  const facts = region(html, '<dl class="facts"', "dl");
+  const end = region(html, '<footer class="end"', "footer");
+
+  it("renders the PoC card: the repo link and the tested versions", () => {
+    expect(rail).toMatch(/Proof of concept/);
+    expect(rail).toContain('href="https://github.com/thpham/blog"');
+    expect(rail).toMatch(/<dt[^>]*>Tested<\/dt>/);
+    expect(rail).toMatch(
+      />Astro<span class="sep"[^>]*> · <\/span><span class="version"[^>]*>7\.4\.0</,
+    );
+    expect(rail).toMatch(
+      />Node\.js<span class="sep"[^>]*> · <\/span><span class="version"[^>]*>24</,
+    );
+  });
+
+  it("states what the content was verified against, and when", () => {
+    expect(facts).toMatch(/>verified <time[^>]*datetime="2026-10-18"[^>]*>[^<]+<\/time>/);
+  });
+
+  it("renders the table of contents past three sections", () => {
+    const toc = region(html, '<nav class="toc"', "nav");
+    expect([...toc.matchAll(/<li\b/g)].length).toBeGreaterThan(3);
+    expect(toc).toMatch(/>The pipeline</);
+    expect(toc).toMatch(/>Isolines, in code</);
+  });
+
+  it("lists its sources, numbered, in the end matter", () => {
+    const sources = region(end, '<section class="sources"', "section");
+    expect([...sources.matchAll(/<li\b/g)].length).toBeGreaterThanOrEqual(4);
+    expect(sources).toContain('href="https://docs.astro.build/');
+    expect(sources).toContain('href="https://en.wikipedia.org/wiki/Marching_squares"');
+    expect(sources).toContain('href="https://pagefind.app/"');
+  });
+
+  it("links the Lab entry it grew from", () => {
+    expect(end).toContain('href="/lab/wordmark-from-font-geometry"');
+    expect(end).toMatch(/class="kind"[^>]*>Lab</);
+  });
+});
+
+// The Horizon mark and the translation link, covered on demo content that
+// really carries them (the T5 coverage ruling, branch one).
+describe("the Horizon demo essay and its translation", () => {
+  const en = page(distDir, "writing/agents-join-the-platform.html");
+  const fr = page(distDir, "writing/agents-et-plateformes.html");
+
+  it("carries the Horizon mark in the metadata, linking the definition", () => {
+    const head = region(en, '<p class="article-meta"', "p");
+    expect(head).toContain('href="/horizon"');
+    expect(head).toMatch(/>\s*Horizon\s*</);
+  });
+
+  it("lands on /horizon and its filter page keeps Writing current", () => {
+    expect(page(distDir, "horizon.html")).toContain('href="/writing/agents-join-the-platform"');
+    expect(page(distDir, "horizon.html")).toMatch(/href="\/writing"[^>]*aria-current="page"/);
+  });
+
+  it("links its French translation in the end matter, and vice versa", () => {
+    const enEnd = region(en, '<footer class="end"', "footer");
+    expect(enEnd).toContain('href="/writing/agents-et-plateformes"');
+    expect(enEnd).toMatch(/In French/);
+    expect(enEnd).toMatch(/hreflang="fr"/);
+    const frEnd = region(fr, '<footer class="end"', "footer");
+    expect(frEnd).toContain('href="/writing/agents-join-the-platform"');
+    expect(frEnd).toMatch(/In English/);
+    expect(frEnd).toMatch(/hreflang="en"/);
+  });
+
+  it("emits hreflang alternates in <head> for the pair", () => {
+    expect(en).toMatch(
+      /rel="alternate" hreflang="fr" href="https:\/\/blog\.ithings\.ch\/writing\/agents-et-plateformes"/,
+    );
+    expect(fr).toMatch(
+      /rel="alternate" hreflang="en" href="https:\/\/blog\.ithings\.ch\/writing\/agents-join-the-platform"/,
+    );
+  });
+
+  it("shows each language of the pair only in its own language filter", () => {
+    expect(page(distDir, "writing/lang/fr.html")).toContain('href="/writing/agents-et-plateformes"');
+    expect(page(distDir, "writing/lang/fr.html")).not.toContain('href="/writing/agents-join-the-platform"');
+    const en = page(distDir, "writing/lang/en.html");
+    expect(en).toContain('href="/writing/agents-join-the-platform"');
+    expect(en).not.toContain('href="/writing/agents-et-plateformes"');
   });
 });

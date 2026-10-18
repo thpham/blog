@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { QUADRANTS, RINGS, layoutBlips, ringBounds } from "../../src/lib/radar";
+import { QUADRANTS, RINGS, layoutBlips, movement, ringBounds } from "../../src/lib/radar";
 
 const distDir = fileURLToPath(new URL("../../dist", import.meta.url));
 const noDemoDir = fileURLToPath(new URL("../../dist-nodemo", import.meta.url));
@@ -36,6 +36,30 @@ const BLIPS = [
   { id: "openshift", quadrant: "platform-cloud", ring: "trial" },
   { id: "terraform", quadrant: "tools-practices", ring: "adopt" },
 ];
+
+/**
+ * The demo histories the movement assertions read (ruling P3, advisory of
+ * Task 8): instead of hard-coding `moved`/`new` against the real clock —
+ * which fails once a date falls out of the 90-day window — the tests compute
+ * the same value, with the same library and the same date, that the built
+ * page computed a few seconds earlier. Terraform stays silent whatever the
+ * clock (its single entry is years out of any window).
+ */
+const DEMO_HISTORIES: Record<string, { date: Date; ring: string }[]> = {
+  astro: [{ date: new Date("2026-02-10"), ring: "trial" }],
+  "claude-code": [
+    { date: new Date("2026-09-01"), ring: "trial" },
+    { date: new Date("2026-04-01"), ring: "assess" },
+  ],
+  kubernetes: [
+    { date: new Date("2026-06-01"), ring: "adopt" },
+    { date: new Date("2025-11-04"), ring: "trial" },
+  ],
+  nixos: [{ date: new Date("2026-08-30"), ring: "assess" }],
+  terraform: [{ date: new Date("2025-05-12"), ring: "adopt" }],
+};
+
+const moveOf = (id: string) => movement(DEMO_HISTORIES[id] ?? [{ date: new Date(0), ring: "adopt" }], new Date());
 
 const SIZE = 640;
 const R = SIZE / 2;
@@ -184,9 +208,19 @@ describe("radar list (dist/radar.html)", () => {
     }
   });
 
-  it("mentions recent movements in mono: one moved, one new", () => {
-    expect(html).toContain('data-move="moved"');
-    expect(html).toContain('data-move="new"');
+  it("mentions recent movements in mono — the same markers the clock allows", () => {
+    // Every shipped blip's history is years-old demo candidate data except
+    // Claude Code (moved) and NixOS (new); the expectation is computed, so
+    // the test survives the dates drifting out of the 90-day window.
+    const markers: ("moved" | "new")[] = [];
+    for (const b of BLIPS) {
+      const m = moveOf(b.id);
+      if (m) markers.push(m);
+    }
+    for (const m of new Set(markers)) expect(html, `marker ${m}`).toContain(`data-move="${m}"`);
+    for (const m of (["moved", "new"] as const).filter((m) => !markers.includes(m))) {
+      expect(html).not.toContain(`data-move="${m}"`);
+    }
   });
 
   it("appears in the navigation and marks itself current", () => {
@@ -212,7 +246,12 @@ describe("blip page (dist/radar/claude-code.html)", () => {
 
   it("states its current ring and the recent movement", () => {
     expect(sheet).toMatch(/data-current-ring="trial"/);
-    expect(sheet).toMatch(/data-movement="moved"/);
+    // Computed with the same clock the page was built with (see the note
+    // above): it is "moved" today, and the attribute disappears when the
+    // history date falls out of the 90-day window.
+    const expected = moveOf("claude-code");
+    if (expected) expect(sheet).toMatch(new RegExp(`data-movement="${expected}"`));
+    else expect(sheet).not.toMatch(/data-movement="moved|new"/);
   });
 
   it("renders the note as prose", () => {
@@ -229,8 +268,10 @@ describe("blip page (dist/radar/claude-code.html)", () => {
 describe("blip page (dist/radar/nixos.html)", () => {
   const sheet = page(distDir, "radar/nixos.html");
 
-  it("marks the recent entry as new", () => {
-    expect(sheet).toMatch(/data-movement="new"/);
+  it("marks the recent entry as new, while the window holds", () => {
+    const expected = moveOf("nixos");
+    if (expected) expect(sheet).toMatch(new RegExp(`data-movement="${expected}"`));
+    else expect(sheet).not.toMatch(/data-movement="moved|new"/);
   });
 
   it("lists its single history entry", () => {

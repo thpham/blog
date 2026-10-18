@@ -121,3 +121,15 @@ describe("demo article without demo content", () => {
     expect(existsSync(join(noDemoDir, ARTICLE))).toBe(false);
   });
 });
+
+describe("the demo article's code (ruling T5)", () => {
+  it("extracts the site's own contour generator into a highlighted block", () => {
+    const block = element(html, "data-language=[\"']ts[\"']", "figure");
+    expect(block).toMatch(/export function contourField/);
+    expect(block).toMatch(/marching squares|segmentsFor/);
+  });
+
+  it("names the repository it is excerpted from", () => {
+    expect(html).toMatch(/src\/lib\/isolines\.ts/);
+  });
+});
