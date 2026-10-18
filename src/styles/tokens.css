@@ -8,6 +8,11 @@
  * saturation, because the originals miss 4.5:1:
  *   --accent  #a35f00 -> #975800  (4.44 -> 5.02 on bg, 4.06 -> 4.59 on surface)
  *   --muted   #686d70 -> #64696c  (4.24 -> 4.50 on surface)
+ *
+ * One secondary token was added by Task 7: --status-abandoned, the matte
+ * bordeaux of an abandoned lab entry (not in the §7.1 table). Both themes
+ * clear WCAG AA 4.5:1 on bg and surface; tests/unit/contrast.test.ts checks
+ * it alongside the §7.1 palette.
  */
 
 :root {
@@ -21,6 +26,7 @@
   --accent: #975800;
   --iso: #8f897b;
   --ok: #3f8a4f;
+  --status-abandoned: #8a3d3d;
 }
 
 :root[data-theme="dark"] {
@@ -34,6 +40,7 @@
   --accent: #f2b544;
   --iso: #6f7c81;
   --ok: #7fc98a;
+  --status-abandoned: #b98a8a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -48,6 +55,7 @@
     --accent: #f2b544;
     --iso: #6f7c81;
     --ok: #7fc98a;
+    --status-abandoned: #b98a8a;
   }
 }
 

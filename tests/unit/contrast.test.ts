@@ -28,6 +28,20 @@ function palette(body: string): Palette {
   return out;
 }
 
+/** Reads one hex token, by the same mechanism as `palette`. */
+function token(body: string, name: string): string {
+  const m = new RegExp(String.raw`--${name}\s*:\s*(#[0-9a-fA-F]{3,6})\s*;`).exec(body);
+  if (!m) throw new Error(`--${name} missing`);
+  return m[1].toLowerCase();
+}
+
+// The abandoned-status colour sits outside the §7.1 palette (added by Task
+// 7), but is text, so it is held to the same 4.5:1 as the §7.1 tokens.
+const abandoned = {
+  light: token(block(css, /(?:^|\n)\s*:root/), "status-abandoned"),
+  dark: token(block(css, /:root\[data-theme="dark"\]/), "status-abandoned"),
+} as const;
+
 const mediaDark = /@media\s*\(prefers-color-scheme:\s*dark\)\s*\{([\s\S]*?\})\s*\}/.exec(css);
 
 const themes: Record<string, Palette> = {
@@ -74,8 +88,20 @@ describe("design tokens (src/styles/tokens.css)", () => {
         expect(contrastRatio(p.ok, p.bg)).toBeGreaterThanOrEqual(3);
         expect(contrastRatio(p.ok, p.surface)).toBeGreaterThanOrEqual(3);
       });
+      it("status-abandoned label on bg and surface ≥ 4.5:1", () => {
+        expect(contrastRatio(abandoned[name as "light" | "dark"], p.bg)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(abandoned[name as "light" | "dark"], p.surface)).toBeGreaterThanOrEqual(
+          4.5,
+        );
+      });
     });
   }
+
+  it("carries --status-abandoned in the no-JS dark fallback, identical to the dark theme", () => {
+    expect(mediaDark).not.toBeNull();
+    const fallback = token(block(mediaDark![1], /:root:not\(\[data-theme\]\)/), "status-abandoned");
+    expect(fallback).toBe(abandoned.dark);
+  });
 
   it("keeps the dark palette of §7.1 unchanged", () => {
     expect(themes.dark).toEqual({
