@@ -1,4 +1,6 @@
+import mdx from "@astrojs/mdx";
 import { defineConfig, fontProviders } from "astro/config";
+import expressiveCode from "astro-expressive-code";
 
 const fontsource = fontProviders.fontsource();
 
@@ -9,6 +11,9 @@ export default defineConfig({
   build: {
     format: "file",
   },
+  // Expressive Code must come before MDX so it also handles code in .mdx
+  // files. Its options live in ec.config.mjs.
+  integrations: [expressiveCode(), mdx()],
   // Self-hosted at build time: files are downloaded from Fontsource and
   // served from /_astro/fonts, nothing is requested from a font CDN at runtime.
   fonts: [

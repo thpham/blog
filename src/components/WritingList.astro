@@ -1,0 +1,181 @@
+---
+/**
+ * Writing rows, after the approved mockup: mono date, serif title, mono
+ * metadata (Horizon in the accent, language, reading time, topics) and the
+ * description. The whole row is the link target; only the title is a link
+ * in the accessibility tree. An empty list shows one neutral sentence.
+ */
+import { readingTime } from "../lib/content";
+import { isoDate } from "../lib/format";
+import { entryUrl } from "../lib/ids";
+import type { WritingEntry } from "../lib/queries";
+import LangBadge from "./LangBadge.astro";
+
+interface Props {
+  entries: WritingEntry[];
+  /** Shown instead of the list when there is nothing to list. */
+  empty: string;
+}
+
+const { entries, empty } = Astro.props;
+---
+
+{
+  entries.length === 0 ? (
+    <div class="empty">
+      <p>{empty}</p>
+    </div>
+  ) : (
+    <ol role="list" class="rows">
+      {entries.map((e) => (
+        <li class="row">
+          <time class="date" datetime={isoDate(e.data.date)}>
+            {isoDate(e.data.date)}
+          </time>
+          <div class="body">
+            <h2 class="title serif" lang={e.data.lang}>
+              <a href={entryUrl("writing", e.id)}>{e.data.title}</a>
+            </h2>
+            <p class="summary" lang={e.data.lang}>
+              {e.data.description}
+            </p>
+            <p class="facts">
+              {e.data.horizon && (
+                <>
+                  <span class="horizon">Horizon</span>
+                  <span class="sep" aria-hidden="true">·</span>
+                </>
+              )}
+              <LangBadge lang={e.data.lang} />
+              <span class="sep" aria-hidden="true">·</span>
+              <span>{readingTime(e.body ?? "")} min</span>
+              {e.data.topics.length > 0 && (
+                <>
+                  <span class="sep topics-sep" aria-hidden="true">·</span>
+                  <span class="topics">{e.data.topics.map((t) => t.label).join(", ")}</span>
+                </>
+              )}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+<style>
+  .rows {
+    border-bottom: var(--hairline);
+  }
+
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: var(--s-2);
+    padding-block: var(--s-5);
+    border-top: var(--hairline);
+  }
+
+  .date,
+  .facts {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .title {
+    font-size: var(--fs-title);
+    font-weight: 400;
+    line-height: var(--lh-title);
+    letter-spacing: -0.005em;
+    margin-bottom: var(--s-2);
+  }
+
+  .title a {
+    text-decoration: none;
+  }
+
+  /* The whole row is clickable; the title stays the only link. */
+  .title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .row:hover .title a,
+  .title a:focus-visible {
+    color: var(--accent);
+  }
+
+  .title a:focus-visible {
+    outline: none;
+  }
+
+  .row:has(.title a:focus-visible) {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .summary {
+    max-width: 62ch;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--muted);
+    margin-bottom: var(--s-3);
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.5em;
+    row-gap: var(--s-1);
+  }
+
+  .horizon {
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: var(--track-meta);
+  }
+
+  .sep {
+    color: var(--line);
+  }
+
+  .topics {
+    color: var(--muted);
+  }
+
+  /* Narrow screens: topics take their own line, no dangling separator. */
+  @media (max-width: 39.99em) {
+    .topics-sep {
+      display: none;
+    }
+
+    .topics {
+      flex-basis: 100%;
+    }
+  }
+
+  .empty {
+    padding-block: var(--s-6);
+    border-block: var(--hairline);
+    color: var(--muted);
+  }
+
+  @media (min-width: 40em) {
+    .row {
+      grid-template-columns: 7.5rem minmax(0, 1fr);
+      column-gap: var(--s-5);
+    }
+
+    /* Sit the date on the title's first baseline. */
+    .date {
+      padding-top: 0.4rem;
+    }
+  }
+</style>

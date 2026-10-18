@@ -1,0 +1,84 @@
+---
+/** Numbered sources at the end of an article: title, then the host in mono. */
+import { displayUrl } from "../lib/artifacts";
+
+interface Props {
+  sources?: { title: string; url: string }[];
+}
+
+const { sources = [] } = Astro.props;
+const host = (url: string) => displayUrl(url).split("/")[0];
+---
+
+{
+  sources.length > 0 && (
+    <section class="sources" aria-labelledby="sources-title">
+      <h2 id="sources-title" class="label">
+        Sources
+      </h2>
+      <ol role="list">
+        {sources.map((s, i) => (
+          <li>
+            <span class="n" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span class="what">
+              <a href={s.url}>{s.title}</a>
+              <span class="host">{host(s.url)}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+<style>
+  .label {
+    margin-bottom: var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    padding-block: var(--s-3);
+    border-top: var(--hairline);
+  }
+
+  li:last-child {
+    border-bottom: var(--hairline);
+  }
+
+  .n,
+  .host {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .n {
+    padding-top: 0.2em;
+  }
+
+  .what {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-1) var(--s-3);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+
+  a {
+    overflow-wrap: anywhere;
+  }
+</style>

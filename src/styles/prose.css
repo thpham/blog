@@ -1,0 +1,231 @@
+/*
+ * Long-form article text (spec §7.3, §7.9). Scoped under .prose.
+ *
+ * Running text is set in Newsreader, the serif of the titles: it was drawn
+ * for continuous on-screen reading, and its optical-size axis (followed by
+ * font-optical-sizing: auto) gives a sturdier text cut at body sizes than
+ * the thin display cut of the titles. The interface stays in Instrument
+ * Sans and the metadata in Plex Mono, so the three roles of the mockup are
+ * kept: serif to read, sans to operate, mono to measure.
+ *
+ * Measure: about 70 characters per line (spec: 65 to 72). The --measure
+ * token (68ch) is right for the sans faces, but `ch` is the width of "0",
+ * and Newsreader's average letter is much narrower than its zero: 68ch of
+ * it sets about 90 characters. Measured on running English text, a
+ * Newsreader character averages 0.39em, so 28em holds about 70.
+ */
+
+.prose {
+  --prose-measure: 28em;
+
+  max-width: var(--prose-measure);
+  font-family: var(--font-serif);
+  font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.66;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-kerning: normal;
+  hanging-punctuation: first;
+  overflow-wrap: break-word;
+  counter-reset: figure;
+}
+
+/* ---------- vertical rhythm ---------- */
+
+.prose > * + * {
+  margin-top: 1.15em;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+/* ---------- headings ---------- */
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  scroll-margin-top: var(--s-5);
+  font-variant-numeric: lining-nums;
+}
+
+.prose h2 {
+  margin-top: 2.1em;
+  font-size: clamp(1.5rem, 1.3rem + 0.7vw, 1.875rem);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.012em;
+}
+
+.prose h3 {
+  margin-top: 2em;
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.prose h4 {
+  margin-top: 1.8em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  letter-spacing: var(--track-meta);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+  margin-top: 0.6em;
+}
+
+/* ---------- inline ---------- */
+
+.prose a {
+  text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  text-underline-offset: 0.18em;
+}
+
+.prose a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+.prose :not(pre) > code {
+  padding: 0.12em 0.36em 0.08em;
+  border: var(--hairline);
+  border-radius: 2px;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  font-variant-numeric: normal;
+  overflow-wrap: anywhere;
+}
+
+.prose kbd {
+  padding: 0.05em 0.4em;
+  border: var(--hairline);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+}
+
+.prose mark {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: inherit;
+}
+
+.prose abbr[title] {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--muted);
+}
+
+.prose sup,
+.prose sub {
+  line-height: 0;
+  font-size: 0.75em;
+}
+
+/* ---------- lists ---------- */
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose li + li,
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.4em;
+}
+
+.prose ul > li::marker {
+  content: "– ";
+  color: var(--muted);
+}
+
+.prose ol > li::marker {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+/* ---------- blocks ---------- */
+
+.prose blockquote {
+  padding-left: 1.25em;
+  border-left: 1px solid var(--accent);
+  font-style: italic;
+  color: var(--muted);
+}
+
+.prose blockquote > * + * {
+  margin-top: 0.8em;
+}
+
+.prose hr {
+  width: 4rem;
+  margin: 2.6em 0;
+  border: 0;
+  border-top: var(--hairline);
+}
+
+.prose img {
+  border-radius: var(--radius);
+}
+
+.prose > p > img:only-child {
+  width: 100%;
+}
+
+/* Expressive Code blocks: a little more air than paragraphs. */
+.prose > .expressive-code {
+  margin-block: 1.8em;
+}
+
+/* Expressive Code styles scrollbars with ::-webkit-scrollbar only; this is
+   the standard property, so Firefox does not draw a light system track. */
+.prose .expressive-code pre {
+  scrollbar-color: var(--ec-sbThumbCol) transparent;
+  scrollbar-width: thin;
+}
+
+/* ---------- tables ---------- */
+
+.prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.prose th,
+.prose td {
+  padding: 0.55em 1.1em 0.55em 0;
+  border-bottom: var(--hairline);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  font-weight: 400;
+  letter-spacing: var(--track-meta);
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom-color: var(--muted);
+}

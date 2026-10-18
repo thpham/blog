@@ -93,6 +93,11 @@ em {
   color: var(--text);
 }
 
+/* The editorial face, for titles set outside h1–h4 or made explicit. */
+.serif {
+  font-family: var(--font-serif);
+}
+
 /* Display title: thin serif, one word may be set in italic accent. */
 .display {
   font-family: var(--font-serif);

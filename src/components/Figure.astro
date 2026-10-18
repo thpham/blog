@@ -1,0 +1,160 @@
+---
+/**
+ * An optimised image in <figure>, with an optional caption and click to
+ * enlarge. The enlarged copy lives in a native <dialog>: it opens with the
+ * button (keyboard included), closes on Esc, on any click, or with its
+ * close button, and the browser returns focus to the opener. The large
+ * file is only fetched when the dialog opens.
+ *
+ * In MDX, import the image next to the article and pass it:
+ * `<Figure src={shot} alt="…" caption="…" />`.
+ */
+import type { ImageMetadata } from "astro";
+import { getImage, Image } from "astro:assets";
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  caption?: string;
+  /** Required for remote or public images that Astro cannot measure. */
+  width?: number;
+  height?: number;
+}
+
+const { src, alt, caption, width, height } = Astro.props;
+const widths = [480, 720, 1080, 1440];
+const sizes = "(min-width: 64em) 35rem, calc(100vw - 2.5rem)";
+// Local images are measured by Astro; remote or public ones need explicit
+// dimensions, or are measured once at build time.
+const remoteSize = width && height ? { width, height } : { inferSize: true as const };
+const large =
+  typeof src === "string"
+    ? await getImage({ src, ...remoteSize, format: "webp" })
+    : await getImage({ src, width: Math.min(src.width, 2400), format: "webp" });
+---
+
+<figure class="figure">
+  <button type="button" class="zoom" data-figure-zoom aria-haspopup="dialog" aria-label={`Enlarge image: ${alt}`}>
+    {
+      typeof src === "string" ? (
+        <Image src={src} alt={alt} {...remoteSize} widths={widths} sizes={sizes} />
+      ) : (
+        <Image src={src} alt={alt} widths={widths} sizes={sizes} />
+      )
+    }
+  </button>
+  {caption && <figcaption>{caption}</figcaption>}
+  <dialog class="zoomed" aria-label={alt}>
+    <img
+      src={large.src}
+      alt={alt}
+      width={large.attributes.width}
+      height={large.attributes.height}
+      loading="lazy"
+      decoding="async"
+    />
+    <form method="dialog">
+      <button class="close">Close</button>
+    </form>
+  </dialog>
+</figure>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-figure-zoom]")) {
+    const dialog = button.parentElement?.querySelector("dialog");
+    if (!dialog) continue;
+    button.addEventListener("click", () => dialog.showModal());
+    // Any click inside the open dialog (image, backdrop, button) closes it.
+    dialog.addEventListener("click", () => dialog.close());
+  }
+</script>
+
+<style>
+  .figure {
+    margin-block: 2em;
+  }
+
+  .zoom {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  .zoom :global(img) {
+    width: 100%;
+    border-radius: var(--radius);
+  }
+
+  .zoom:focus-visible {
+    outline-offset: 4px;
+  }
+
+  figcaption {
+    display: flex;
+    gap: 0.75em;
+    margin-top: var(--s-3);
+    font-family: var(--font-sans);
+    font-size: var(--fs-small);
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  /* Figures are numbered in reading order across the article. */
+  figcaption::before {
+    counter-increment: figure;
+    content: "Fig. " counter(figure);
+    flex: none;
+    padding-top: 0.15em;
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .zoomed {
+    max-width: min(96vw, 110rem);
+    max-height: 94vh;
+    padding: 0;
+    border: var(--hairline);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    cursor: zoom-out;
+    overflow: hidden;
+  }
+
+  .zoomed::backdrop {
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+  }
+
+  .zoomed img {
+    display: block;
+    max-width: 100%;
+    max-height: calc(94vh - 2px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .zoomed form {
+    position: absolute;
+    top: var(--s-3);
+    right: var(--s-3);
+  }
+
+  .close {
+    padding: 0.4rem 0.7rem;
+    border: var(--hairline);
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+</style>

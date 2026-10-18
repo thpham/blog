@@ -1,0 +1,27 @@
+---
+import WritingIndex from "../../../layouts/WritingIndex.astro";
+import { visibleWriting } from "../../../lib/queries";
+
+// Both pages always exist, even when a language has no article yet: the
+// filter links on /writing must never lead to a missing page.
+export function getStaticPaths() {
+  return [{ params: { lang: "en" } }, { params: { lang: "fr" } }] as const;
+}
+
+const { lang } = Astro.params;
+const name = lang === "en" ? "English" : "French";
+const all = await visibleWriting();
+const entries = all.filter((e) => e.data.lang === lang);
+---
+
+<WritingIndex
+  title={`Writing in ${name}`}
+  description={`Articles by Thomas Pham written in ${name}.`}
+  eyebrow={`Writing · ${lang.toUpperCase()}`}
+  heading={`In ${name}`}
+  entries={entries}
+  all={all}
+  current={{ kind: "lang", lang }}
+  empty={`No articles in ${name}.`}
+  feed={`/rss/${lang}.xml`}
+/>

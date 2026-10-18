@@ -1,0 +1,28 @@
+---
+import type { GetStaticPaths } from "astro";
+import WritingIndex from "../../layouts/WritingIndex.astro";
+import { visibleWriting } from "../../lib/queries";
+import { topicIndex } from "../../lib/writing";
+
+export const getStaticPaths = (async () => {
+  const all = await visibleWriting();
+  return topicIndex(all).map((t) => ({
+    params: { topic: t.slug },
+    props: { label: t.label, all },
+  }));
+}) satisfies GetStaticPaths;
+
+const { topic } = Astro.params;
+const { label, all } = Astro.props;
+const entries = all.filter((e) => e.data.topics.some((t) => t.slug === topic));
+---
+
+<WritingIndex
+  title={label}
+  description={`Articles by Thomas Pham on ${label}.`}
+  eyebrow="Writing · Topic"
+  entries={entries}
+  all={all}
+  current={{ kind: "topic", slug: topic }}
+  empty={`No articles on ${label}.`}
+/>
