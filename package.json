@@ -8,7 +8,7 @@
     "dev": "yarn predev && astro dev",
     "prebuild": "node tools/excalidraw/export.mjs",
     "build": "yarn prebuild && astro build && pagefind --site dist",
-    "build:nodemo": "yarn prebuild && ITHINGS_NO_DEMO=1 astro build",
+    "build:nodemo": "yarn prebuild && ITHINGS_NO_DEMO=1 astro build && pagefind --site dist-nodemo",
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run tests/unit --passWithNoTests",

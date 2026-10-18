@@ -35,12 +35,14 @@ jobs:
         # before astro build (package.json: prebuild).
         run: yarn playwright install --with-deps chromium
       - name: Build website
-        run: yarn build
+        run: yarn build:nodemo
 
+      # ITHINGS_NO_DEMO=1 drops the demo entries (content.config.ts); the
+      # Pages deployment is always the non-demo build, never the demo one.
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: dist
+          path: dist-nodemo
 
   deploy:
     name: Deploy to GitHub Pages
