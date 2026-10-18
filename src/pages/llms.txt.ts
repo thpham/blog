@@ -27,7 +27,7 @@ export async function GET() {
   const file = [
     `# ${SITE.name}`,
     "",
-    `> Field notes by Thomas Pham on platforms, connected things and the AI woven through both. Articles are written in English or in French, from Lausanne.`,
+    `> ${SITE.description}`,
     "",
     `Base URL: ${SITE.url}`,
     "",

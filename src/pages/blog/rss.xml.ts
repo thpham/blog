@@ -11,7 +11,7 @@ export async function GET(context: APIContext) {
   const items = await feedEntries();
   return rss({
     title: `${SITE.name} (blog)`,
-    description: "Field notes by Thomas Pham on platforms, connected things and the AI woven through both.",
+    description: SITE.description,
     site: context.site!,
     // @astrojs/rss consumes { link, pubDate, description } and silently
     // drops unknown keys, so our FeedEntry shape maps onto it here.

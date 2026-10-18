@@ -27,7 +27,7 @@ export async function GET(context: APIContext) {
       description: summary,
     })),
     title: `${SITE.name} · ${lang === "fr" ? "FR" : "EN"}`,
-    description: "Field notes by Thomas Pham on platforms, connected things and the AI woven through both.",
+    description: SITE.description,
     site: context.site!,
     customData: `<language>${lang}</language><generator>ithings</generator>`,
   });

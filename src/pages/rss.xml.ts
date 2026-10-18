@@ -22,7 +22,7 @@ export async function GET(context: APIContext) {
       description: summary,
     })),
     title: SITE.name,
-    description: "Field notes by Thomas Pham on platforms, connected things and the AI woven through both.",
+    description: SITE.description,
     site: context.site!,
     customData: "<generator>ithings</generator>",
   });

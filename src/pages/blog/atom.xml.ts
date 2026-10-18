@@ -31,7 +31,7 @@ export async function GET(context: APIContext) {
   const xml = `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>${esc(SITE.name)}</title>
-  <subtitle>${esc("Field notes by Thomas Pham on platforms, connected things and the AI woven through both.")}</subtitle>
+  <subtitle>${esc(SITE.description)}</subtitle>
   <id>${site.href}</id>
   <link rel="alternate" href="${site.href}"/>
   <link rel="self" href="${new URL("/blog/atom.xml", site).href}"/>
