@@ -62,7 +62,8 @@ function segmentsFor(mask: number, T: Point, R: Point, B: Point, L: Point): Poin
 /**
  * Marching squares over a scalar field `f`, sampled on a `cell`-sized grid
  * covering [0, w] x [0, h]. Returns one Contour per requested level, each a
- * single `d` path (segments as `M…L…`) with coordinates rounded to 0.1.
+ * single `d` path — connected segment runs chained into one `L` run (the
+ * HTML carries half the path data that way), coordinates rounded to 0.1.
  * `major` is true for every fourth level by index (0, 4, 8, …).
  */
 export function contourField(
@@ -81,7 +82,12 @@ export function contourField(
     }
   }
 
+  const fmt = (v: number) => {
+    const s = v.toFixed(1);
+    return s.endsWith(".0") ? s.slice(0, -2) : s;
+  };
   return levelList.map((level, index) => {
+    const pen = { x: "", y: "" };
     let d = "";
     for (let j = 0; j < ny - 1; j++) {
       for (let i = 0; i < nx - 1; i++) {
@@ -101,7 +107,19 @@ export function contourField(
         const L: Point = [x, y + (cell * (level - a)) / (e - a)];
 
         for (const [p1, p2] of segmentsFor(mask, T, R, B, L)) {
-          d += `M${p1[0].toFixed(1)} ${p1[1].toFixed(1)}L${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+          const x1 = fmt(p1[0]);
+          const y1 = fmt(p1[1]);
+          const x2 = fmt(p2[0]);
+          const y2 = fmt(p2[1]);
+          // A segment continuing where the pen already sits only needs the
+          // L: chaining the runs halves the path data the HTML carries.
+          if (pen.x === x1 && pen.y === y1) {
+            d += `L${x2} ${y2}`;
+          } else {
+            d += `M${x1} ${y1}L${x2} ${y2}`;
+          }
+          pen.x = x2;
+          pen.y = y2;
         }
       }
     }

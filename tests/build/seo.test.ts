@@ -126,8 +126,19 @@ describe("llms.txt", () => {
     expect(llms).toContain("Base URL: https://blog.ithings.ch");
   });
 
+  it("carries at least one link even while no entry is published", () => {
+    // The evergreen `## Site` section (About, Colophon, Writing, RSS) keeps
+    // the file a valid llmstxt.org list — and the Lighthouse llms-txt audit
+    // green — regardless of how many entries exist.
+    const links = [...llms.matchAll(/^-\s+\[.+\]\(.+\)/gm)];
+    expect(links.length).toBeGreaterThanOrEqual(4);
+    expect(llms).toContain("## Site");
+  });
+
   it("still exists once demo content is deleted", () => {
-    expect(text(noDemoDir, "llms.txt").startsWith("# ithings")).toBe(true);
+    const noDemo = text(noDemoDir, "llms.txt");
+    expect(noDemo.startsWith("# ithings")).toBe(true);
+    expect(noDemo).toContain("## Site");
   });
 });
 
