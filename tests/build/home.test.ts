@@ -165,6 +165,20 @@ describe("preview panel script", () => {
   });
 });
 
+describe("panel position (left of the feed)", () => {
+  it("gives the feed the wide second column on desktop", () => {
+    expect(css).toMatch(/\.body-grid[^{]*\{[^}]*grid-template-columns:\s*21rem\s*minmax\(0,\s*1fr\)/);
+  });
+
+  it("swaps the panel to the visual left with order, not DOM position", () => {
+    expect(css).toMatch(/\.preview[^{]*\{[^}]*order:\s*-1/);
+    const feedStart = html.search(/class="[^"]*feedwrap/);
+    const panelStart = html.search(/class="[^"]*preview[^"]*"/);
+    expect(feedStart, "feed first in the DOM").toBeGreaterThan(-1);
+    expect(panelStart).toBeGreaterThan(feedStart);
+  });
+});
+
 describe("mobile layout", () => {
   it("hides the preview panel and reveals feed summaries under 52rem", () => {
     // The minifier may rewrite the query to its (width<=52rem) form, and the

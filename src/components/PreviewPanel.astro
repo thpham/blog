@@ -229,6 +229,9 @@ const testedLine = (item: FeedRow): string =>
 
 <style>
   .preview {
+    /* Visually first column of the home grid, while the feed stays first in
+       the DOM (tab order unchanged; the panel is hidden on one column). */
+    order: -1;
     align-self: start;
     position: sticky;
     top: var(--s-4);

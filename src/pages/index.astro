@@ -107,9 +107,11 @@ const items: FeedRow[] = latestFeed(writing, lab).map((item) => ({
     border-top: var(--hairline);
   }
 
+  /* The preview panel takes the first (left) column: the aside brings
+     order: -1, so the DOM and the keyboard order stay feed-first. */
   .body-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 21rem;
+    grid-template-columns: 21rem minmax(0, 1fr);
     column-gap: var(--s-6);
     border-bottom: var(--hairline);
   }
