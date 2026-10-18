@@ -2,53 +2,43 @@
   "name": "blog",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "docusaurus": "docusaurus",
-    "start": "docusaurus start --port 3001",
-    "build": "docusaurus build",
-    "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy",
-    "clear": "docusaurus clear",
-    "serve": "docusaurus serve",
-    "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids",
-    "typecheck": "tsc"
+    "predev": "node tools/excalidraw/export.mjs",
+    "dev": "yarn predev && astro dev",
+    "prebuild": "node tools/excalidraw/export.mjs",
+    "build": "yarn prebuild && astro build && pagefind --site dist",
+    "build:nodemo": "yarn prebuild && ITHINGS_NO_DEMO=1 astro build && pagefind --site dist-nodemo",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run tests/unit --passWithNoTests",
+    "test:build": "yarn build && yarn build:nodemo && vitest run tests/build"
   },
   "dependencies": {
-    "@docusaurus/core": "3.9.2",
-    "@docusaurus/plugin-content-docs": "3.9.2",
-    "@docusaurus/plugin-google-gtag": "^3.9.2",
-    "@docusaurus/plugin-google-tag-manager": "^3.9.2",
-    "@docusaurus/preset-classic": "3.9.2",
-    "@docusaurus/theme-common": "3.9.2",
-    "@docusaurus/theme-mermaid": "^3.9.2",
-    "@easyops-cn/docusaurus-search-local": "^0.46.1",
-    "@mdx-js/react": "^3.0.0",
-    "clsx": "^2.0.0",
-    "prism-react-renderer": "^2.3.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "@astrojs/mdx": "^8.1.0",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.0",
+    "astro-expressive-code": "^0.44.2",
+    "mermaid-isomorphic": "3.1.0",
+    "playwright": "1.64.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.9.2",
-    "@docusaurus/tsconfig": "3.9.2",
-    "@docusaurus/types": "3.9.2",
-    "@types/react": "^18.0.0",
-    "typescript": "~5.9.3"
-  },
-  "browserslist": {
-    "production": [
-      ">0.5%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 3 chrome version",
-      "last 3 firefox version",
-      "last 5 safari version"
-    ]
+    "@astrojs/check": "^0.9.10",
+    "@emnapi/runtime": "^1.11.3",
+    "@excalidraw/utils": "0.1.5",
+    "@fontsource/instrument-sans": "5.3.0",
+    "@fontsource/newsreader": "5.3.0",
+    "@pagefind/default-ui": "1.5.2",
+    "@resvg/resvg-js": "2.6.2",
+    "pagefind": "1.5.2",
+    "satori": "0.57.2",
+    "satteri": "^0.10.5",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.5"
   },
   "engines": {
-    "node": ">=20.0"
-  }
+    "node": ">=22.22"
+  },
+  "packageManager": "yarn@4.18.0"
 }

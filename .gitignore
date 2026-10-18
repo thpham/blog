@@ -1,9 +1,11 @@
 # Production
-/build
+dist/
+dist-nodemo/
+dist-smoke/
 
 # Generated files
-.docusaurus
-.cache-loader
+.astro/
+*.excalidraw.*.svg
 
 
 # Node modules
@@ -62,3 +64,6 @@ Thumbs.db
 
 # Optional stylelint cache
 .stylelintcache
+
+# direnv flakes artifacts (corepack shims, nix per-env state)
+.direnv/

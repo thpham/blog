@@ -1,0 +1,133 @@
+---
+/**
+ * Shared frame of the writing list and its filter pages (/writing,
+ * /writing/lang/<lang>, /topics/<slug>, /horizon): a page head, the rows,
+ * and the filters beside them (above them on narrow screens).
+ */
+import WritingFilters, { type WritingFilter } from "../components/WritingFilters.astro";
+import WritingList from "../components/WritingList.astro";
+import type { WritingEntry } from "../lib/queries";
+import Base from "./Base.astro";
+
+interface Props {
+  /** Document title. */
+  title: string;
+  description: string;
+  eyebrow: string;
+  /** Visible h1; defaults to `title`. */
+  heading?: string;
+  entries: WritingEntry[];
+  all: WritingEntry[];
+  current: WritingFilter;
+  empty: string;
+  feed?: string;
+}
+
+const { title, description, eyebrow, heading = title, entries, all, current, empty, feed = "/rss.xml" } = Astro.props;
+const noun = entries.length === 1 ? "article" : "articles";
+---
+
+<Base title={title} description={description}>
+  <header class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">{eyebrow}</p>
+      <h1 class="display">{heading}</h1>
+      {
+        Astro.slots.has("intro") && (
+          <div class="intro">
+            <slot name="intro" />
+          </div>
+        )
+      }
+    </div>
+  </header>
+
+  <div class="wrap layout">
+    <section class="list" aria-labelledby="list-label">
+      <div class="sec">
+        <p id="list-label">{entries.length} {noun}</p>
+        <a href={feed}>RSS</a>
+      </div>
+      <WritingList entries={entries} empty={empty} />
+    </section>
+    <aside class="side">
+      <WritingFilters all={all} current={current} />
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .page-head {
+    padding-block: var(--s-8) var(--s-6);
+  }
+
+  .eyebrow {
+    margin-bottom: var(--s-4);
+  }
+
+  h1 {
+    max-width: 18ch;
+  }
+
+  .intro {
+    max-width: 38rem;
+    margin-top: var(--s-5);
+    font-size: var(--fs-lede);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .intro :global(p + p) {
+    margin-top: var(--s-3);
+  }
+
+  .layout {
+    display: grid;
+    row-gap: var(--s-6);
+  }
+
+  .side {
+    order: -1;
+    padding-block: var(--s-4);
+    border-block: var(--hairline);
+  }
+
+  .sec {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-block: 0 var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.4;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .sec a {
+    text-decoration: none;
+  }
+
+  .sec a:hover {
+    color: var(--text);
+  }
+
+  @media (min-width: 64em) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr) 15rem;
+      column-gap: var(--s-8);
+      align-items: start;
+    }
+
+    .side {
+      order: 0;
+      position: sticky;
+      top: var(--s-5);
+      padding-block: 0;
+      padding-left: var(--s-5);
+      border-block: 0;
+      border-left: var(--hairline);
+    }
+  }
+</style>

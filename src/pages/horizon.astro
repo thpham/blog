@@ -1,0 +1,23 @@
+---
+import WritingIndex from "../layouts/WritingIndex.astro";
+import { visibleWriting } from "../lib/queries";
+
+const all = await visibleWriting();
+const entries = all.filter((e) => e.data.horizon);
+---
+
+<WritingIndex
+  title="Horizon"
+  description="Essays by Thomas Pham on where the ecosystem and the industry are heading."
+  eyebrow="Writing · Horizon"
+  entries={entries}
+  all={all}
+  current={{ kind: "horizon" }}
+  empty="No essays carry the Horizon mark."
+>
+  <p slot="intro" class="definition">
+    Horizon marks the essays that look ahead: where the ecosystem and the industry are heading, what is
+    shifting underneath, and what that asks of the people who build and run these systems. Outlook
+    rather than report.
+  </p>
+</WritingIndex>

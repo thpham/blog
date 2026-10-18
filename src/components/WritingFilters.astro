@@ -1,0 +1,136 @@
+---
+/**
+ * Filters for the writing list. Every filter is its own static page
+ * (/writing/lang/<lang>, /horizon, /topics/<slug>), so this is plain
+ * navigation: no client-side filtering, nothing to break without JS.
+ * Counts are shown so an empty filter is never a surprise.
+ */
+import { topicIndex } from "../lib/writing";
+import type { WritingEntry } from "../lib/queries";
+
+export type WritingFilter =
+  | { kind: "all" }
+  | { kind: "lang"; lang: "en" | "fr" }
+  | { kind: "horizon" }
+  | { kind: "topic"; slug: string };
+
+interface Props {
+  /** Every visible writing entry, not only the filtered ones. */
+  all: WritingEntry[];
+  current: WritingFilter;
+}
+
+const { all, current } = Astro.props;
+
+const count = (lang: "en" | "fr") => all.filter((e) => e.data.lang === lang).length;
+const groups = [
+  {
+    label: "Language",
+    items: [
+      { label: "All", href: "/writing", n: all.length, on: current.kind === "all" },
+      ...(["en", "fr"] as const).map((lang) => ({
+        label: lang.toUpperCase(),
+        href: `/writing/lang/${lang}`,
+        n: count(lang),
+        on: current.kind === "lang" && current.lang === lang,
+      })),
+    ],
+  },
+  {
+    label: "Outlook",
+    items: [
+      {
+        label: "Horizon",
+        href: "/horizon",
+        n: all.filter((e) => e.data.horizon).length,
+        on: current.kind === "horizon",
+      },
+    ],
+  },
+  {
+    label: "Topics",
+    items: topicIndex(all).map((t) => ({
+      label: t.label,
+      href: `/topics/${t.slug}`,
+      n: t.count,
+      on: current.kind === "topic" && current.slug === t.slug,
+    })),
+  },
+].filter((g) => g.items.length > 0);
+---
+
+<nav class="filters" aria-label="Filter writing">
+  {
+    groups.map((g) => (
+      <div class="group">
+        <p class="label">{g.label}</p>
+        <ul role="list">
+          {g.items.map((item) => (
+            <li>
+              <a href={item.href} aria-current={item.on ? "page" : undefined}>
+                <span class="name">{item.label}</span>
+                <span class="n">{item.n}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</nav>
+
+<style>
+  .filters {
+    display: grid;
+    row-gap: var(--s-5);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+  }
+
+  .label {
+    margin-bottom: var(--s-2);
+    color: var(--muted);
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-4);
+  }
+
+  a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45em;
+    padding-block: 0.3rem;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .n {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  a:hover .name {
+    color: var(--accent);
+  }
+
+  a[aria-current="page"] .name {
+    text-decoration-line: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.45em;
+  }
+
+  @media (min-width: 64em) {
+    ul {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+</style>

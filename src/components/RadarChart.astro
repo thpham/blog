@@ -1,0 +1,149 @@
+---
+/**
+ * The isoline tech radar (spec §7.8), rendered at build time as one static
+ * SVG: rings traced from `ringField` through the marching-squares machine,
+ * quadrant labels, and every blip as a link wrapping its halo and node —
+ * hover via the SVG title child, click to the mini-note. Zero client
+ * JavaScript; the accessible version of the chart is the list on the page.
+ */
+import type { Contour } from "../lib/isolines";
+import { contourField } from "../lib/isolines";
+import { QUADRANTS, RINGS, layoutBlips, ringBounds, ringField, ringLevels } from "../lib/radar";
+
+interface Blip {
+  id: string;
+  name: string;
+  quadrant: string;
+  ring: string;
+  movement: "moved" | "new" | null;
+}
+
+interface Props {
+  blips: Blip[];
+  size?: number;
+}
+
+const { blips, size: SIZE = 640 } = Astro.props;
+const C = SIZE / 2;
+
+const field = ringField(SIZE, "radar");
+const contours: Contour[] = contourField(field, SIZE, SIZE, ringLevels(SIZE), 4);
+const bounds = ringBounds(SIZE);
+
+const placed = layoutBlips(
+  blips.map(({ id, quadrant, ring }) => ({ id, quadrant, ring })),
+  SIZE,
+);
+const byId = new Map(blips.map((b) => [b.id, b]));
+
+/** Ring labels sit on the mid radius of their band, on the vertical axis. */
+const RING_LABELS = RINGS.map((ring, i) => ({
+  label: ring[0].toUpperCase() + ring.slice(1),
+  y: C - (bounds[i].inner + bounds[i].outer) / 2,
+}));
+
+/** Quadrant labels in the square's corners, outside the inscribed rings. */
+const QUADRANT_LABELS = QUADRANTS.map((q, i) => {
+  // Sectors: 0 top-right, 1 bottom-right, 2 bottom-left, 3 top-left.
+  const right = i <= 1;
+  const bottom = i === 1 || i === 2;
+  const pad = 8;
+  return {
+    label: q.label,
+    x: right ? SIZE - pad : pad,
+    y: bottom ? SIZE - pad : pad + 11,
+    anchor: right ? "end" : "start",
+  };
+});
+---
+
+<svg
+  class="radar-chart"
+  viewBox={`0 0 ${SIZE} ${SIZE}`}
+  role="img"
+  aria-label={`Tech radar of Thomas Pham: ${blips.length} technologies positioned on the ${RINGS.join(", ")} rings of ${QUADRANTS.length} quadrants. The list below reads the same positions.`}
+>
+  <g class="rings">
+    {
+      contours
+        .filter((c) => c.d)
+        .map((c) => <path class="ring" data-level={c.level} d={c.d} />)
+    }
+  </g>
+  <g class="labels">
+    {
+      RING_LABELS.map((l) => (
+        <text class="ring-label" x={C + 5} y={l.y}>
+          {l.label}
+        </text>
+      ))
+    }
+    {
+      QUADRANT_LABELS.map((l) => (
+        <text class="quadrant-label" x={l.x} y={l.y} text-anchor={l.anchor}>
+          {l.label}
+        </text>
+      ))
+    }
+  </g>
+  <g class="blips">
+    {
+      placed.map((p) => {
+        const blip = byId.get(p.id)!;
+        return (
+          <a
+            href={`/radar/${p.id}`}
+            data-id={p.id}
+            data-quadrant={blip.quadrant}
+            data-ring={blip.ring}
+          >
+            <title>
+              {blip.name} — {blip.ring}
+              {blip.movement ? ` (${blip.movement})` : ""}
+            </title>
+            {blip.movement && <circle class="halo" cx={p.x} cy={p.y} r="10" />}
+            <circle class="node" cx={p.x} cy={p.y} r="4" />
+          </a>
+        );
+      })
+    }
+  </g>
+</svg>
+
+<style>
+  .radar-chart {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: var(--font-mono);
+  }
+
+  .rings path {
+    fill: none;
+    stroke: var(--iso);
+    stroke-width: 1;
+    stroke-linecap: round;
+    opacity: 0.9;
+  }
+
+  .ring-label,
+  .quadrant-label {
+    fill: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    paint-order: stroke;
+    stroke: var(--bg);
+    stroke-width: 3px;
+  }
+
+  .halo {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1;
+    opacity: 0.8;
+  }
+
+  .node {
+    fill: var(--accent);
+  }
+</style>

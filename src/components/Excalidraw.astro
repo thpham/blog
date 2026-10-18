@@ -1,0 +1,62 @@
+---
+/**
+ * An Excalidraw drawing that follows the theme toggle (spec §7.9).
+ *
+ * In MDX: `<Excalidraw src="./x.excalidraw" alt="…" caption="…" />`, with
+ * the .excalidraw scene beside the article. tools/excalidraw/export.mjs
+ * (run before `dev` and `build`) writes its light and dark SVGs next to it;
+ * this shows both, and global.css hides the one that does not match
+ * html[data-theme]. Both are plain <img>: lazy, so the hidden variant is not
+ * fetched, and each carries its own embedded font.
+ *
+ * A relative `src` is resolved against the article by the excalidraw-src
+ * plugin (src/plugins/excalidraw-src.ts); a path from the project root
+ * ("/src/content/…") also works.
+ */
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+const exports = import.meta.glob<{ default: ImageMetadata }>("/src/content/**/*.excalidraw.{light,dark}.svg", {
+  eager: true,
+});
+
+const { src, alt, caption } = Astro.props;
+const variants = (["light", "dark"] as const).map((theme) => {
+  const image = exports[`${src}.${theme}.svg`]?.default;
+  if (!image) {
+    throw new Error(
+      `<Excalidraw src="${src}">: no ${theme} export. Is the path right? Run \`node tools/excalidraw/export.mjs\`.`,
+    );
+  }
+  return { theme, image };
+});
+---
+
+<figure class="figure excalidraw">
+  {
+    variants.map(({ theme, image }) => (
+      <img
+        class={`only-${theme}`}
+        src={image.src}
+        width={image.width}
+        height={image.height}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+      />
+    ))
+  }
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  /* Natural size, never wider than the text column. */
+  img {
+    margin-inline: auto;
+  }
+</style>

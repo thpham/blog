@@ -1,0 +1,22 @@
+---
+import WritingIndex from "../../layouts/WritingIndex.astro";
+import { visibleWriting } from "../../lib/queries";
+
+const all = await visibleWriting();
+---
+
+<WritingIndex
+  title="Writing"
+  description="Articles by Thomas Pham on platforms, infrastructure, connected things and AI, in English or French."
+  eyebrow="Index"
+  entries={all}
+  all={all}
+  current={{ kind: "all" }}
+  empty="No articles are published."
+>
+  <p slot="intro">
+    Platforms, infrastructure, connected things and the AI woven through both. Each piece is written
+    in English or in French and, where it applies, lists the versions it was tested with and the
+    sources it draws on.
+  </p>
+</WritingIndex>

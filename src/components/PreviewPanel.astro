@@ -1,0 +1,335 @@
+---
+/**
+ * The home preview panel (spec §7.6): a sticky aside that shows an entry's
+ * own relief and its mono facts — topics, date, reading time (writing) or
+ * status and last touch (lab). The newest entry's card is pre-rendered into
+ * the aside so it works without JavaScript; every feed item also gets an
+ * equally pre-rendered `<template data-preview-for>`, which the tiny inline
+ * script clones into the aside on `mouseenter` or `focusin`. All relief is
+ * computed at build time (terrainFor) — the script never computes, it only
+ * swaps. The aside card and the template below must mirror each other.
+ */
+import Isolines from "./Isolines.astro";
+import LangBadge from "./LangBadge.astro";
+import StatusBadge from "./StatusBadge.astro";
+import { isoDate, monthYear } from "../lib/format";
+import { terrainFor } from "../lib/isolines";
+
+/** Terrain size in viewBox units; the drawing slices to the panel's width. */
+const PANEL_W = 320;
+const PANEL_H = 200;
+
+interface FeedRow {
+  kind: "writing" | "lab";
+  id: string;
+  url: string;
+  title: string;
+  date: Date;
+  lang: "en" | "fr";
+  summary: string;
+  readingTime?: number;
+  tested?: { name: string; version: string }[];
+  verified?: Date;
+  labStatus?: string;
+  topics?: { label: string; slug: string }[];
+  seedKey: string;
+}
+
+interface Props {
+  items: FeedRow[];
+}
+
+const { items } = Astro.props;
+const first = items[0];
+
+type Terrain = ReturnType<typeof terrainFor>;
+
+const terrainOf = new Map(
+  items.map((item): [string, Terrain] => [item.id, terrainFor(item.seedKey, PANEL_W, PANEL_H)]),
+);
+const kind = (item: FeedRow): string => (item.kind === "lab" ? "Lab" : "Writing");
+const testedLine = (item: FeedRow): string =>
+  (item.tested ?? []).map((t) => `${t.name} ${t.version}`).join(", ");
+---
+
+{
+  first && (
+    <aside class="preview" lang="en" aria-live="polite">
+      <div class="card">
+        <div class="terrain">
+          <Isolines
+            contours={terrainOf.get(first.id)!.contours}
+            sources={terrainOf.get(first.id)!.sources}
+            width={PANEL_W}
+            height={PANEL_H}
+            opacity={0.45}
+            class="iso"
+          />
+          <p class="coord">
+            <span>terrain #{terrainOf.get(first.id)!.seed}</span>
+            <span>{terrainOf.get(first.id)!.sources.length} nodes</span>
+          </p>
+        </div>
+        <p class="kind">
+          <span class="kind-label">{kind(first)}</span>
+          <LangBadge lang={first.lang} />
+        </p>
+        <h3 class="pv-title" lang={first.lang}>
+          <a href={first.url}>{first.title}</a>
+        </h3>
+        <p class="pv-sum" lang={first.lang}>
+          {first.summary}
+        </p>
+        <dl class="pv-facts">
+          {first.kind === "writing" ? (
+            <>
+              {(first.topics ?? []).length > 0 && (
+                <>
+                  <dt>topics</dt>
+                  <dd>{(first.topics ?? []).map((t) => t.label).join(", ")}</dd>
+                </>
+              )}
+              <dt>date</dt>
+              <dd><time datetime={isoDate(first.date)}>{isoDate(first.date)}</time></dd>
+              {first.readingTime && (
+                <>
+                  <dt>reading</dt>
+                  <dd>{first.readingTime} min</dd>
+                </>
+              )}
+              {(first.tested ?? []).length > 0 && (
+                <>
+                  <dt>tested</dt>
+                  <dd>{testedLine(first)}</dd>
+                </>
+              )}
+              {first.verified && (
+                <>
+                  <dt>status</dt>
+                  <dd class="verified">verified {monthYear(first.verified)}</dd>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <dt>status</dt>
+              <dd>
+                <StatusBadge status={first.labStatus ?? "concluded"} />
+              </dd>
+              <dt>last touched</dt>
+              <dd><time datetime={isoDate(first.date)}>{isoDate(first.date)}</time></dd>
+            </>
+          )}
+        </dl>
+      </div>
+    </aside>
+  )
+}
+
+{
+  first && (
+    <div class="templates">
+      {items.map((item) => (
+        <template data-preview-for={item.id}>
+          <div class="card">
+            <div class="terrain">
+              <Isolines
+                contours={terrainOf.get(item.id)!.contours}
+                sources={terrainOf.get(item.id)!.sources}
+                width={PANEL_W}
+                height={PANEL_H}
+                opacity={0.45}
+                class="iso"
+              />
+              <p class="coord">
+                <span>terrain #{terrainOf.get(item.id)!.seed}</span>
+                <span>{terrainOf.get(item.id)!.sources.length} nodes</span>
+              </p>
+            </div>
+            <p class="kind">
+              <span class="kind-label">{kind(item)}</span>
+              <LangBadge lang={item.lang} />
+            </p>
+            <h3 class="pv-title" lang={item.lang}>
+              <a href={item.url}>{item.title}</a>
+            </h3>
+            <p class="pv-sum" lang={item.lang}>
+              {item.summary}
+            </p>
+            <dl class="pv-facts">
+              {item.kind === "writing" ? (
+                <>
+                  {(item.topics ?? []).length > 0 && (
+                    <>
+                      <dt>topics</dt>
+                      <dd>{(item.topics ?? []).map((t) => t.label).join(", ")}</dd>
+                    </>
+                  )}
+                  <dt>date</dt>
+                  <dd><time datetime={isoDate(item.date)}>{isoDate(item.date)}</time></dd>
+                  {item.readingTime && (
+                    <>
+                      <dt>reading</dt>
+                      <dd>{item.readingTime} min</dd>
+                    </>
+                  )}
+                  {(item.tested ?? []).length > 0 && (
+                    <>
+                      <dt>tested</dt>
+                      <dd>{testedLine(item)}</dd>
+                    </>
+                  )}
+                  {item.verified && (
+                    <>
+                      <dt>status</dt>
+                      <dd class="verified">verified {monthYear(item.verified)}</dd>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <dt>status</dt>
+                  <dd>
+                    <StatusBadge status={item.labStatus ?? "concluded"} />
+                  </dd>
+                  <dt>last touched</dt>
+                  <dd><time datetime={isoDate(item.date)}>{isoDate(item.date)}</time></dd>
+                </>
+              )}
+            </dl>
+          </div>
+        </template>
+      ))}
+    </div>
+  )
+}
+
+<script is:inline>
+  // Home preview panel: swaps the hovered or focused feed item's
+  // pre-rendered template into the aside. No computation, no dependencies.
+  (function () {
+    var panel = document.querySelector(".preview");
+    if (!panel) return;
+    function show(item) {
+      var template = document.querySelector(
+        'template[data-preview-for="' + item.getAttribute("data-feed-id") + '"]'
+      );
+      if (template) panel.replaceChildren(template.content.cloneNode(true));
+    }
+    document.querySelectorAll(".feed-item").forEach(function (item) {
+      item.addEventListener("mouseenter", function () {
+        show(item);
+      });
+      item.addEventListener("focusin", function () {
+        show(item);
+      });
+    });
+  })();
+</script>
+
+<style>
+  .preview {
+    /* Visually first column of the home grid, while the feed stays first in
+       the DOM (tab order unchanged; the panel is hidden on one column). */
+    order: -1;
+    align-self: start;
+    position: sticky;
+    top: var(--s-4);
+    padding-block: var(--s-5);
+    background: var(--surface);
+    border-block: var(--hairline);
+  }
+
+  .terrain {
+    aspect-ratio: 320 / 200;
+    border: var(--hairline);
+    background: var(--bg);
+  }
+
+  .coord {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--s-1);
+    margin-bottom: var(--s-4);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--muted);
+  }
+
+  .kind {
+    display: flex;
+    align-items: baseline;
+    column-gap: 0.5em;
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .kind-label {
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .pv-title {
+    font-size: var(--fs-title);
+    font-weight: 400;
+    line-height: var(--lh-title);
+    letter-spacing: -0.005em;
+    margin-block: var(--s-2) var(--s-2);
+  }
+
+  .pv-title a {
+    text-decoration: none;
+  }
+
+  .pv-title a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+  }
+
+  .pv-sum {
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    color: var(--muted);
+    margin-bottom: var(--s-4);
+  }
+
+  .pv-facts {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: var(--s-4);
+    row-gap: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+
+  .pv-facts dt {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .pv-facts dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .verified::before {
+    content: "●";
+    color: var(--ok);
+    font-size: 0.5rem;
+    margin-right: 0.4em;
+    vertical-align: 0.1em;
+  }
+
+  @media (max-width: 52rem) {
+    /* The list carries the summaries on mobile; the panel is gone. */
+    .preview {
+      display: none;
+    }
+  }
+</style>

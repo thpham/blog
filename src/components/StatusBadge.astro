@@ -1,0 +1,41 @@
+---
+/**
+ * The status of a lab entry, set in the mono face (spec §6.2, §7.7). The
+ * colour carries the meaning — `exploring` in the accent, `paused` in the
+ * muted tone, `concluded` in `--ok`, and `abandoned` in the secondary token
+ * `--status-abandoned`. The label stays the raw status word: the lab is a
+ * notebook, not a marketing page.
+ */
+interface Props {
+  status: string;
+}
+
+const { status } = Astro.props;
+---
+
+<span class="status-badge" data-status={status}>{status}</span>
+
+<style>
+  .status-badge {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+
+  .status-badge[data-status="exploring"] {
+    color: var(--accent);
+  }
+
+  .status-badge[data-status="paused"] {
+    color: var(--muted);
+  }
+
+  .status-badge[data-status="concluded"] {
+    color: var(--ok);
+  }
+
+  .status-badge[data-status="abandoned"] {
+    color: var(--status-abandoned);
+  }
+</style>

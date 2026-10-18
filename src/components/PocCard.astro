@@ -1,0 +1,127 @@
+---
+/**
+ * The proof of concept behind an article: repository, demo, slides, and
+ * the versions it was actually tested with. Renders nothing when the entry
+ * has none of them.
+ */
+import { displayUrl, repoLink, type Link } from "../lib/artifacts";
+
+interface Props {
+  poc?: { repo?: string; demo?: string; slides?: string };
+  tested?: { name: string; version: string }[];
+}
+
+const { poc = {}, tested = [] } = Astro.props;
+const rows: Array<{ term: string; link: Link }> = [];
+if (poc.repo) rows.push({ term: "Repo", link: repoLink(poc.repo) });
+if (poc.demo) rows.push({ term: "Demo", link: { href: poc.demo, label: displayUrl(poc.demo) } });
+if (poc.slides) rows.push({ term: "Slides", link: { href: poc.slides, label: displayUrl(poc.slides) } });
+const heading = rows.length > 0 ? "Proof of concept" : "Tested with";
+---
+
+{
+  (rows.length > 0 || tested.length > 0) && (
+    <section class="poc" aria-labelledby="poc-title">
+      <h2 id="poc-title" class="label">
+        {heading}
+      </h2>
+      <dl>
+        {rows.map(({ term, link }) => (
+          <div class="row">
+            <dt>{term}</dt>
+            <dd>
+              <a href={link.href}>
+                {link.label}
+                <span class="arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+            </dd>
+          </div>
+        ))}
+        {tested.length > 0 && (
+          <div class="row">
+            <dt>{rows.length > 0 ? "Tested" : "Versions"}</dt>
+            <dd>
+              <ul role="list">
+                {tested.map((t) => (
+                  <li>
+                    {t.name}
+                    <span class="sep" aria-hidden="true"> · </span>
+                    <span class="version">{t.version}</span>
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        )}
+      </dl>
+    </section>
+  )
+}
+
+<style>
+  .poc {
+    padding: var(--s-4) var(--s-4) var(--s-4);
+    border: var(--hairline);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+
+  .label {
+    margin-bottom: var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  dl {
+    display: grid;
+    row-gap: var(--s-2);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    column-gap: var(--s-3);
+  }
+
+  dt {
+    color: var(--muted);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--accent);
+  }
+
+  .arrow {
+    margin-left: 0.25em;
+    color: var(--muted);
+  }
+
+  .sep {
+    color: var(--muted);
+  }
+
+  .version {
+    font-variant-numeric: tabular-nums;
+  }
+</style>

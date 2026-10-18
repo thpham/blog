@@ -1,0 +1,28 @@
+---
+/** `EN` / `FR` in mono, with the language name for assistive technology. */
+interface Props {
+  lang: "en" | "fr";
+  class?: string;
+}
+
+const NAMES = { en: "English", fr: "French" } as const;
+const { lang, class: className } = Astro.props;
+---
+
+<abbr class:list={["lang-badge", className]} title={NAMES[lang]}>{lang.toUpperCase()}</abbr>
+
+<style>
+  .lang-badge {
+    display: inline-block;
+    padding: 0.08em 0.38em 0.04em;
+    border: var(--hairline);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: inherit;
+    line-height: 1.25;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: help;
+  }
+</style>

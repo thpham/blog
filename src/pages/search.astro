@@ -1,0 +1,87 @@
+---
+/**
+ * Search (spec §9): the Pagefind UI over the site's non-demo index. The UI
+ * is styled from the design tokens, so it follows the theme switch like
+ * every other surface of the site.
+ */
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Search" description="Full-text search across the writing, the Lab notes and the tech radar of ithings.">
+  <header class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Index</p>
+      <h1 class="display">Search</h1>
+    </div>
+  </header>
+  <div class="wrap search" aria-label="Search results">
+    <div id="search"></div>
+    <noscript>
+      <p class="noscript">Search needs JavaScript. The full index also lives in the <a href="/llms.txt">llms.txt</a> page list.</p>
+    </noscript>
+  </div>
+</Base>
+
+<script>
+  import "@pagefind/default-ui/css/ui.css";
+  import { PagefindUI } from "@pagefind/default-ui";
+
+  const mount = document.getElementById("search");
+  if (mount) {
+    new PagefindUI({
+      element: mount,
+      showSubResults: true,
+      showImages: false,
+      // The index covers only the entry bodies; the chrome around them adds
+      // nothing to search in.
+      baseUrl: "/",
+    });
+  }
+</script>
+
+<style>
+  /* Page-head spacing matches Page.astro — same title start height as
+     Writing, Lab and Radar; the search box below owns no extra top pad. */
+  .page-head {
+    padding-block: var(--s-8) var(--s-6);
+  }
+
+  .eyebrow {
+    margin-bottom: var(--s-4);
+  }
+
+  .search {
+    max-width: 44rem;
+    padding-block: 0 var(--s-9);
+  }
+
+  /* The Pagefind UI takes the design tokens as its own: the variables it
+     reads are mapped onto them, so light and dark follow data-theme
+     without any Pagefind-specific palette. */
+  #search {
+    --pagefind-ui-text: var(--text);
+    --pagefind-ui-background: var(--surface);
+    --pagefind-ui-border: var(--line);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 0;
+    --pagefind-ui-tag: var(--surface);
+    --pagefind-ui-primary: var(--accent);
+    --pagefind-ui-font: var(--font-sans), system-ui, sans-serif;
+  }
+
+  /* The UI resets <mark> to the browser's yellow; matches carry the accent
+     instead — matte, no decoration (global constraints). */
+  #search :global(mark) {
+    background: transparent;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .search noscript p {
+    color: var(--muted);
+  }
+
+  .search noscript a {
+    color: inherit;
+  }
+</style>

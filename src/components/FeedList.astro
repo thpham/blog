@@ -1,0 +1,171 @@
+---
+/**
+ * The unified home feed (spec §7.6): writing and lab rows, newest first.
+ * Each row is one `<a class="feed-item">` carrying `data-feed-id`, the key
+ * the preview panel uses to find that entry's pre-rendered template. Rows
+ * mirror the /writing and /lab lists: mono date, serif title, mono facts;
+ * lab entries carry the LAB marker and show their status instead of a
+ * reading time. The summary is carried into the preview panel with
+ * JavaScript, or printed in the row below `52rem` without it.
+ */
+import LangBadge from "./LangBadge.astro";
+import StatusBadge from "./StatusBadge.astro";
+import { isoDate } from "../lib/format";
+
+interface FeedRow {
+  kind: "writing" | "lab";
+  id: string;
+  url: string;
+  title: string;
+  date: Date;
+  lang: "en" | "fr";
+  summary: string;
+  readingTime?: number;
+  labStatus?: string;
+  topics?: { label: string; slug: string }[];
+}
+
+interface Props {
+  items: FeedRow[];
+}
+
+const { items } = Astro.props;
+---
+
+<ol role="list" class="feed">
+  {
+    items.map((item) => (
+      <li>
+        <a class="feed-item" href={item.url} data-feed-id={item.id} lang={item.lang}>
+          <time class="date" datetime={isoDate(item.date)}>
+            {isoDate(item.date)}
+          </time>
+          <div class="body">
+            <h3 class="title">{item.title}</h3>
+            <p class="summary">{item.summary}</p>
+            <p class="facts">
+              {item.kind === "lab" && (
+                <>
+                  <span class="lab-tag">Lab</span>
+                  <span class="sep" aria-hidden="true">
+                    ·
+                  </span>
+                </>
+              )}
+              <LangBadge lang={item.lang} />
+              <span class="sep" aria-hidden="true">
+                ·
+              </span>
+              {item.kind === "writing" ? (
+                <span>{item.readingTime} min</span>
+              ) : (
+                <StatusBadge status={item.labStatus ?? "concluded"} />
+              )}
+              {item.kind === "writing" && (item.topics ?? []).length > 0 && (
+                <>
+                  <span class="sep topics-sep" aria-hidden="true">
+                    ·
+                  </span>
+                  <span class="topics">{(item.topics ?? []).map((t) => t.label).join(", ")}</span>
+                </>
+              )}
+            </p>
+          </div>
+        </a>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .feed {
+    border-bottom: var(--hairline);
+  }
+
+  .feed-item {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: var(--s-2);
+    padding-block: var(--s-4);
+    border-top: var(--hairline);
+    text-decoration: none;
+  }
+
+  .date,
+  .facts {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .title {
+    font-size: var(--fs-title);
+    font-weight: 400;
+    line-height: var(--lh-title);
+    letter-spacing: -0.005em;
+    margin-bottom: var(--s-2);
+  }
+
+  .feed-item:hover .title,
+  .feed-item:focus-visible .title {
+    color: var(--accent);
+  }
+
+  .summary {
+    max-width: 62ch;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--muted);
+    margin-bottom: var(--s-2);
+    /* With JavaScript the preview panel carries the summary; the row prints
+       it itself only on the panel-less mobile layout. */
+    display: none;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.5em;
+    row-gap: var(--s-1);
+  }
+
+  .lab-tag {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .sep {
+    color: var(--line);
+  }
+
+  .topics {
+    color: var(--muted);
+  }
+
+  @media (min-width: 40em) {
+    .feed-item {
+      grid-template-columns: 7.5rem minmax(0, 1fr);
+      column-gap: var(--s-5);
+    }
+
+    /* Sit the date on the title's first baseline. */
+    .date {
+      padding-top: 0.4rem;
+    }
+  }
+
+  @media (max-width: 52rem) {
+    /* No preview panel on mobile: each row tells its own summary. */
+    .summary {
+      display: block;
+    }
+  }
+</style>

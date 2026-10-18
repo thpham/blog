@@ -1,0 +1,368 @@
+---
+/**
+ * Lab sheet (spec §7.7): the intent as the lede, the notebook facts
+ * (status badge, started, last touched), the entry's own terrain, and the
+ * body at the prose measure. End matter: the outcome when there is one, the
+ * writing entry the exploration was promoted to, and the PoC artifacts.
+ */
+import { getEntry, render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Isolines from "../../components/Isolines.astro";
+import LangBadge from "../../components/LangBadge.astro";
+import PocCard from "../../components/PocCard.astro";
+import StatusBadge from "../../components/StatusBadge.astro";
+import Base from "../../layouts/Base.astro";
+import { isVisible } from "../../lib/content";
+import { isoDate } from "../../lib/format";
+import { entryUrl } from "../../lib/ids";
+import { terrainFor } from "../../lib/isolines";
+import { visibleLab } from "../../lib/queries";
+import "../../styles/prose.css";
+
+export const getStaticPaths = (async () => {
+  const entries = await visibleLab();
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+
+// The exploration grew into a writing entry; one that is not visible
+// (a draft in production) is not linked.
+const promotedRef = data.promotedTo;
+const promoted = promotedRef ? await getEntry(promotedRef) : undefined;
+const showPromoted = promoted !== undefined && isVisible(promoted.data, import.meta.env.PROD);
+const hasPoc = Boolean(data.poc?.repo || data.poc?.demo || data.poc?.slides);
+
+const TW = 520;
+const TH = 300;
+const terrain = terrainFor(`lab/${entry.id}`, TW, TH);
+---
+
+<Base
+  title={data.title}
+  description={data.intent}
+  lang={data.lang}
+  noindex={data.demo}
+  ogImage={`/og/lab/${entry.id}.png`}
+>
+  <article class="article" data-pagefind-ignore={data.demo ? "" : undefined}>
+    <header class="lab-head">
+      <div class="wrap head">
+        <div class="head-text">
+          <p class="lab-meta" lang="en">
+            <StatusBadge status={data.status} />
+            <span class="sep" aria-hidden="true">·</span>
+            <LangBadge lang={data.lang} />
+            <span class="sep" aria-hidden="true">·</span>
+            <span>started <time datetime={isoDate(data.started)}>{isoDate(data.started)}</time></span>
+            <span class="sep" aria-hidden="true">·</span>
+            <span>
+              last touched <time datetime={isoDate(data.lastTouched)}>{isoDate(data.lastTouched)}</time>
+            </span>
+          </p>
+          <h1 class="serif article-title">{data.title}</h1>
+          <p class="lede">{data.intent}</p>
+          <dl class="facts" lang="en">
+            <div>
+              <dt>Started</dt>
+              <dd>
+                <time datetime={isoDate(data.started)}>{isoDate(data.started)}</time>
+              </dd>
+            </div>
+            <div>
+              <dt>Last touched</dt>
+              <dd>
+                <time datetime={isoDate(data.lastTouched)}>{isoDate(data.lastTouched)}</time>
+              </dd>
+            </div>
+            {
+              data.topics.length > 0 && (
+                <div>
+                  <dt>Topics</dt>
+                  <dd>
+                    <ul role="list" class="topics">
+                      {data.topics.map((t) => <li>{t.label}</li>)}
+                    </ul>
+                  </dd>
+                </div>
+              )
+            }
+          </dl>
+        </div>
+        <div class="terrain" aria-hidden="true">
+          <Isolines
+            contours={terrain.contours}
+            sources={terrain.sources}
+            width={TW}
+            height={TH}
+            opacity={0.42}
+          />
+          <p class="coord">
+            <span>terrain #{terrain.seed}</span>
+            <span>{terrain.sources.length} nodes</span>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap article-body">
+      {hasPoc && (
+        <aside class="rail" lang="en">
+          <PocCard poc={data.poc} />
+        </aside>
+      )}
+
+      <div class="prose" data-pagefind-body={data.demo ? undefined : ""}>
+        <Content />
+      </div>
+
+      <footer class="end" lang="en">
+        {
+          data.outcome && (
+            <section class="outcome" aria-labelledby="outcome-title">
+              <h2 id="outcome-title" class="end-label">
+                Outcome
+              </h2>
+              <p>{data.outcome}</p>
+            </section>
+          )
+        }
+        {
+          showPromoted && promoted && (
+            <section class="promoted" aria-labelledby="promoted-title">
+              <h2 id="promoted-title" class="end-label">
+                Promoted to
+              </h2>
+              <p class="promoted-link">
+                <a href={entryUrl("writing", promoted.id)} lang={promoted.data.lang}>
+                  {promoted.data.title}
+                </a>
+              </p>
+            </section>
+          )
+        }
+        <p class="back">
+          <a href="/lab">
+            <span aria-hidden="true">←</span> All lab entries
+          </a>
+        </p>
+      </footer>
+    </div>
+  </article>
+</Base>
+
+<style>
+  /* ---------- header ---------- */
+
+  .lab-head {
+    border-bottom: var(--hairline);
+  }
+
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .head-text {
+    padding-block: var(--s-7) var(--s-6);
+  }
+
+  .lab-meta,
+  .facts,
+  .coord {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .lab-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.55em;
+    margin-bottom: var(--s-5);
+  }
+
+  .sep {
+    color: var(--line);
+  }
+
+  .article-title {
+    max-width: 22ch;
+    font-size: clamp(2.125rem, 1.5rem + 2.6vw, 3.25rem);
+    font-weight: 300;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+  }
+
+  .lede {
+    max-width: 45rem;
+    margin-top: var(--s-5);
+    font-size: var(--fs-lede);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .facts {
+    display: grid;
+    row-gap: var(--s-2);
+    margin-top: var(--s-6);
+    padding-top: var(--s-4);
+    border-top: var(--hairline);
+    max-width: 45rem;
+  }
+
+  .facts > div {
+    display: grid;
+    /* A wider label column than the article's: "last touched" is a long word pair. */
+    grid-template-columns: 6.75rem minmax(0, 1fr);
+    column-gap: var(--s-3);
+  }
+
+  dt {
+    white-space: nowrap;
+  }
+
+  dt {
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--text);
+  }
+
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.9em;
+  }
+
+  .terrain {
+    position: relative;
+    aspect-ratio: 520 / 220;
+    margin-inline: calc(-1 * var(--gutter));
+    border-top: var(--hairline);
+    order: -1;
+  }
+
+  .coord {
+    position: absolute;
+    inset: auto var(--gutter) var(--s-2);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.625rem;
+  }
+
+  /* Keep the caption legible where a contour runs under it. */
+  .coord span {
+    padding: 0.1em 0.35em;
+    margin-inline: -0.35em;
+    background: var(--bg);
+  }
+
+  /* ---------- body ---------- */
+
+  .article-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--s-7);
+    padding-top: var(--s-7);
+  }
+
+  .rail {
+    max-width: 17rem;
+  }
+
+  .end {
+    display: grid;
+    row-gap: var(--s-7);
+    max-width: 45rem;
+    padding-top: var(--s-5);
+  }
+
+  .end-label {
+    margin-bottom: var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .outcome p {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .promoted-link a {
+    text-decoration-color: var(--line);
+    text-underline-offset: 0.3em;
+  }
+
+  .promoted-link a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+
+  .back a {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .back a:hover {
+    color: var(--text);
+  }
+
+  @media (min-width: 64em) {
+    .head,
+    .article-body {
+      grid-template-columns: minmax(0, 45rem) minmax(0, 1fr);
+      column-gap: var(--s-8);
+    }
+
+    .head-text {
+      padding-block: var(--s-8) var(--s-7);
+    }
+
+    .terrain {
+      order: 0;
+      aspect-ratio: auto;
+      min-height: 20rem;
+      margin-inline: 0 calc(-1 * var(--gutter));
+      border-top: 0;
+      border-left: var(--hairline);
+    }
+
+    .coord {
+      inset: auto var(--s-4) var(--s-3);
+    }
+
+    .article-body {
+      padding-top: var(--s-8);
+    }
+
+    .prose,
+    .end {
+      grid-column: 1;
+    }
+
+    .rail {
+      grid-column: 2;
+      grid-row: 1;
+      max-width: 17rem;
+    }
+  }
+</style>

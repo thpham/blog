@@ -1,0 +1,523 @@
+---
+/**
+ * Article page (spec §7.7). Header: mono metadata line, serif title, lede,
+ * topics and verification, and the entry's own terrain. Body: the prose at
+ * a 68ch measure, with a side rail for the proof of concept and, past three
+ * sections, the table of contents. End matter: sources, translation and
+ * related entries, and the optional aiNote.
+ *
+ * <html lang> is the article's language; the interface labels around it
+ * stay English and say so with lang="en".
+ */
+import { getCollection, getEntry, render } from "astro:content";
+import Excalidraw from "../components/Excalidraw.astro";
+import Figure from "../components/Figure.astro";
+import Isolines from "../components/Isolines.astro";
+import LangBadge from "../components/LangBadge.astro";
+import PocCard from "../components/PocCard.astro";
+import Slides from "../components/Slides.astro";
+import Sources from "../components/Sources.astro";
+import { isVisible, readingTime } from "../lib/content";
+import { isoDate, monthYear } from "../lib/format";
+import { entryUrl } from "../lib/ids";
+import { terrainFor } from "../lib/isolines";
+import type { WritingEntry } from "../lib/queries";
+import { postingJsonLd } from "../lib/seo";
+import Base from "./Base.astro";
+import "../styles/prose.css";
+
+interface Props {
+  entry: WritingEntry;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const prod = import.meta.env.PROD;
+const { Content, headings } = await render(entry);
+
+const minutes = readingTime(entry.body ?? "");
+const sections = headings.filter((h) => h.depth === 2);
+const showToc = sections.length > 3;
+const hasPoc = Boolean(data.poc?.repo || data.poc?.demo || data.poc?.slides || data.tested?.length);
+
+const TW = 520;
+const TH = 300;
+const terrain = terrainFor(`writing/${entry.id}`, TW, TH);
+
+// Translations, in both directions: the entry may point to its other
+// version, or be pointed to by it.
+const LANG_NAMES = { en: "English", fr: "French" } as const;
+const pointedTo = data.translationOf ? await getEntry(data.translationOf) : undefined;
+const pointingHere = await getCollection(
+  "writing",
+  (e) => e.data.translationOf?.id === entry.id && isVisible(e.data, prod),
+);
+const translations = [...(pointedTo && isVisible(pointedTo.data, prod) ? [pointedTo] : []), ...pointingHere].filter(
+  (t, i, all) => t.id !== entry.id && all.findIndex((u) => u.id === t.id) === i,
+);
+
+// Related Lab and Radar entries; references that do not resolve are skipped.
+const labRefs = data.related?.lab ?? [];
+const radarRefs = data.related?.radar ?? [];
+const lab = (await Promise.all(labRefs.map((r) => getEntry(r)))).filter((e) => e !== undefined);
+const radar = (await Promise.all(radarRefs.map((r) => getEntry(r)))).filter((e) => e !== undefined);
+
+const elsewhere = [
+  ...translations.map((t) => ({
+    kind: `In ${LANG_NAMES[t.data.lang]}`,
+    title: t.data.title,
+    href: entryUrl("writing", t.id),
+    lang: t.data.lang,
+  })),
+  ...lab.map((e) => ({ kind: "Lab", title: e.data.title, href: entryUrl("lab", e.id), lang: e.data.lang })),
+  ...radar.map((e) => ({ kind: "Radar", title: e.data.name, href: entryUrl("radar", e.id), lang: e.data.lang })),
+];
+---
+
+<Base
+  title={data.title}
+  description={data.description}
+  lang={data.lang}
+  noindex={data.demo}
+  ogImage={`/og/writing/${entry.id}.png`}
+  jsonLd={data.demo ? undefined : postingJsonLd(entry)}
+  alternates={translations.map((t) => ({ hreflang: t.data.lang, href: entryUrl("writing", t.id) }))}
+>
+  <article class="article" data-pagefind-ignore={data.demo ? "" : undefined}>
+    <header class="article-head">
+      <div class="wrap head">
+        <div class="head-text">
+          <p class="article-meta" lang="en">
+            <time datetime={isoDate(data.date)}>{isoDate(data.date)}</time>
+            <span class="sep" aria-hidden="true">·</span>
+            <LangBadge lang={data.lang} />
+            <span class="sep" aria-hidden="true">·</span>
+            <span>{minutes} min</span>
+            {
+              data.horizon && (
+                <>
+                  <span class="sep" aria-hidden="true">·</span>
+                  <a class="horizon" href="/horizon">Horizon</a>
+                </>
+              )
+            }
+          </p>
+          <h1 class="serif article-title">{data.title}</h1>
+          <p class="lede">{data.description}</p>
+          <dl class="facts" lang="en">
+            {
+              data.topics.length > 0 && (
+                <div>
+                  <dt>Topics</dt>
+                  <dd>
+                    <ul role="list" class="topics">
+                      {data.topics.map((t) => (
+                        <li>
+                          <a href={`/topics/${t.slug}`}>{t.label}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              )
+            }
+            {
+              data.updated && (
+                <div>
+                  <dt>Updated</dt>
+                  <dd>
+                    <time datetime={isoDate(data.updated)}>{isoDate(data.updated)}</time>
+                  </dd>
+                </div>
+              )
+            }
+            {
+              data.verified && (
+                <div>
+                  <dt>Status</dt>
+                  <dd class="ok">
+                    verified <time datetime={isoDate(data.verified)}>{monthYear(data.verified)}</time>
+                  </dd>
+                </div>
+              )
+            }
+          </dl>
+        </div>
+        <div class="terrain" aria-hidden="true">
+          <Isolines
+            contours={terrain.contours}
+            sources={terrain.sources}
+            width={TW}
+            height={TH}
+            opacity={0.42}
+          />
+          <p class="coord">
+            <span>terrain #{terrain.seed}</span>
+            <span>{terrain.sources.length} nodes</span>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap article-body">
+      {
+        (hasPoc || showToc) && (
+          <aside class="rail" lang="en">
+            {hasPoc && <PocCard poc={data.poc} tested={data.tested} />}
+            {showToc && (
+              <nav class="toc" aria-labelledby="toc-title">
+                <p id="toc-title" class="toc-label">
+                  Contents
+                </p>
+                <ol role="list">
+                  {sections.map((h, i) => (
+                    <li>
+                      <span class="n" aria-hidden="true">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <a href={`#${h.slug}`} lang={data.lang}>
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+          </aside>
+        )
+      }
+
+      <div class="prose" data-pagefind-body={data.demo ? undefined : ""}>
+        <Content components={{ Excalidraw, Figure, Slides }} />
+      </div>
+
+      <footer class="end" lang="en">
+        <Sources sources={data.sources} />
+        {
+          elsewhere.length > 0 && (
+            <section class="elsewhere" aria-labelledby="elsewhere-title">
+              <h2 id="elsewhere-title" class="end-label">
+                Also on this site
+              </h2>
+              <ul role="list">
+                {elsewhere.map((e) => (
+                  <li>
+                    <span class="kind">{e.kind}</span>
+                    <a href={e.href} hreflang={e.lang} lang={e.lang}>
+                      {e.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+        {data.aiNote && <p class="ai-note">{data.aiNote}</p>}
+        <p class="back">
+          <a href="/writing">
+            <span aria-hidden="true">←</span> All writing
+          </a>
+        </p>
+      </footer>
+    </div>
+  </article>
+</Base>
+
+<style>
+  /* ---------- header ---------- */
+
+  .article-head {
+    border-bottom: var(--hairline);
+  }
+
+  /* minmax(0, …): a long code line must scroll inside its block, never
+     widen the page. */
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .head-text {
+    padding-block: var(--s-7) var(--s-6);
+  }
+
+  .article-meta,
+  .facts,
+  .coord {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.55em;
+    margin-bottom: var(--s-5);
+    text-transform: uppercase;
+    letter-spacing: var(--track-meta);
+  }
+
+  .article-meta time {
+    color: var(--text);
+  }
+
+  .sep {
+    color: var(--line);
+  }
+
+  .horizon {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .horizon:hover {
+    text-decoration-line: underline;
+  }
+
+  .article-title {
+    max-width: 22ch;
+    font-size: clamp(2.125rem, 1.5rem + 2.6vw, 3.25rem);
+    font-weight: 300;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+  }
+
+  .lede {
+    max-width: 45rem;
+    margin-top: var(--s-5);
+    font-size: var(--fs-lede);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .facts {
+    display: grid;
+    row-gap: var(--s-2);
+    margin-top: var(--s-6);
+    padding-top: var(--s-4);
+    border-top: var(--hairline);
+    max-width: 45rem;
+  }
+
+  .facts > div {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    column-gap: var(--s-3);
+  }
+
+  dt {
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--text);
+  }
+
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.9em;
+  }
+
+  .topics a {
+    text-decoration-color: var(--line);
+    text-underline-offset: 0.3em;
+  }
+
+  .topics a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+
+  .ok::before {
+    content: "";
+    display: inline-block;
+    width: 0.55em;
+    height: 0.55em;
+    margin-right: 0.5em;
+    border-radius: 50%;
+    background: var(--ok);
+    vertical-align: 0.05em;
+  }
+
+  .terrain {
+    position: relative;
+    aspect-ratio: 520 / 220;
+    margin-inline: calc(-1 * var(--gutter));
+    border-top: var(--hairline);
+    order: -1;
+  }
+
+  .coord {
+    position: absolute;
+    inset: auto var(--gutter) var(--s-2);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.625rem;
+  }
+
+  /* Keep the caption legible where a contour runs under it. */
+  .coord span {
+    padding: 0.1em 0.35em;
+    margin-inline: -0.35em;
+    background: var(--bg);
+  }
+
+  /* ---------- body ---------- */
+
+  .article-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--s-7);
+    padding-top: var(--s-7);
+  }
+
+  .rail {
+    display: grid;
+    row-gap: var(--s-6);
+    align-content: start;
+  }
+
+  .toc-label,
+  .end-label {
+    margin-bottom: var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .toc li {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    padding-block: 0.35rem;
+    font-size: var(--fs-small);
+    line-height: 1.4;
+  }
+
+  .toc .n {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    color: var(--muted);
+    padding-top: 0.1em;
+  }
+
+  .toc a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .toc a:hover {
+    color: var(--text);
+  }
+
+  .end {
+    display: grid;
+    row-gap: var(--s-7);
+    max-width: 45rem;
+    padding-top: var(--s-5);
+  }
+
+  .elsewhere li {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    column-gap: var(--s-3);
+    padding-block: var(--s-3);
+    border-top: var(--hairline);
+    font-size: 0.9375rem;
+  }
+
+  .elsewhere li:last-child {
+    border-bottom: var(--hairline);
+  }
+
+  .kind {
+    padding-top: 0.25em;
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .ai-note {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+
+  .back a {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .back a:hover {
+    color: var(--text);
+  }
+
+  @media (min-width: 64em) {
+    /* Column 1 is the prose width, so the title, the text and the end
+       matter share one left and one right edge, and the terrain sits above
+       the rail. The rail sits just past the text at its original place next
+       to the prose, not flush right (Thomas's checkpoint decision). */
+    .head {
+      grid-template-columns: minmax(0, 45rem) minmax(0, 1fr);
+      column-gap: var(--s-8);
+    }
+
+    .head-text {
+      padding-block: var(--s-8) var(--s-7);
+    }
+
+    .terrain {
+      order: 0;
+      aspect-ratio: auto;
+      min-height: 20rem;
+      margin-inline: 0 calc(-1 * var(--gutter));
+      border-top: 0;
+      border-left: var(--hairline);
+    }
+
+    .coord {
+      inset: auto var(--s-4) var(--s-3);
+    }
+
+    .article-body {
+      grid-template-columns: minmax(0, 45rem) minmax(0, 1fr);
+      column-gap: var(--s-8);
+      padding-top: var(--s-8);
+    }
+
+    .prose,
+    .end {
+      grid-column: 1;
+    }
+
+    .rail {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      max-width: 17rem;
+    }
+
+    .toc {
+      position: sticky;
+      top: var(--s-5);
+    }
+  }
+</style>

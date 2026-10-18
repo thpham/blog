@@ -1,0 +1,50 @@
+---
+/**
+ * The `ithings` wordmark, inlined so it follows the theme: letters use
+ * currentColor, the tittle and arcs use --accent. Outlines come from
+ * tools/logo/wordmark.py (Instrument Sans 600, see tools/logo/README.md).
+ *
+ * Sizing: the SVG is set in em of the surrounding font size, so the glyphs
+ * render exactly as text at that size and share its baseline. The viewBox
+ * (-123 -992 3245 1262, font units, upm 1000) puts the baseline 992 units
+ * from the top and leaves 270 below it.
+ */
+import svg from "../assets/logo/wordmark.svg?raw";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const markup = svg.replace(
+  '<svg class="logo"',
+  `<svg class="wordmark${className ? ` ${className}` : ""}" focusable="false"`,
+);
+---
+
+<Fragment set:html={markup} />
+
+<style>
+  :global(svg.wordmark) {
+    display: inline-block;
+    width: 3.245em;
+    height: 1.262em;
+    vertical-align: -0.27em;
+    overflow: visible;
+    color: inherit;
+  }
+  :global(svg.wordmark .tt) {
+    fill: var(--accent);
+  }
+  :global(svg.wordmark .arc) {
+    fill: none;
+    stroke: var(--accent);
+    stroke-linecap: round;
+  }
+  :global(svg.wordmark .a1) {
+    opacity: 0.9;
+  }
+  :global(svg.wordmark .a2) {
+    opacity: 0.5;
+  }
+</style>

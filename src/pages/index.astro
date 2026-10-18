@@ -1,0 +1,152 @@
+---
+// Home (spec §7.6): the hero, the unified feed of writing and lab entries,
+// and the sticky preview panel beside it. All relief is drawn at build time;
+// the preview swap is the page's only JavaScript besides the theme toggle.
+import FeedList from "../components/FeedList.astro";
+import Isolines from "../components/Isolines.astro";
+import PreviewPanel from "../components/PreviewPanel.astro";
+import Base from "../layouts/Base.astro";
+import { latestFeed, type FeedItem } from "../lib/content";
+import { visibleLab, visibleWriting } from "../lib/queries";
+import { personJsonLd } from "../lib/seo";
+import { contourField, levels, terrainField, type Source } from "../lib/isolines";
+import { SITE } from "../lib/site";
+
+const W = 520;
+const H = 300;
+const sources: Source[] = [
+  [250, 120, 1, 70],
+  [400, 200, 0.75, 55],
+  [450, 60, 0.5, 40],
+  [140, 240, 0.45, 45],
+];
+const contours = contourField(terrainField(sources, 0), W, H, levels(0.06, 1.2, 0.065));
+
+/** Feed rows extend FeedItem with the writing entry's topics for the panel. */
+type FeedRow = FeedItem & { topics?: { label: string; slug: string }[] };
+
+const writing = await visibleWriting();
+const lab = await visibleLab();
+const topicsOf = new Map(writing.map((e) => [e.id, e.data.topics]));
+const items: FeedRow[] = latestFeed(writing, lab).map((item) => ({
+  ...item,
+  topics: item.kind === "writing" ? (topicsOf.get(item.id) ?? []) : undefined,
+}));
+---
+
+<Base
+  title={SITE.name}
+  description={SITE.description}
+  ogImage="/og/home.png"
+  jsonLd={personJsonLd()}
+>
+  <section class="hero">
+    <div class="wrap grid">
+      <div class="txt">
+        <p class="eyebrow">{SITE.author} · {SITE.city}</p>
+        <h1 class="display">Field notes on the systems that <em>quietly</em> run everything.</h1>
+        <p class="intro">{SITE.description}</p>
+      </div>
+      <div class="field">
+        <Isolines contours={contours} sources={sources} width={W} height={H} opacity={0.4} />
+      </div>
+    </div>
+  </section>
+
+  {
+    items.length > 0 && (
+      <div class="wrap body-grid">
+        <section class="feedwrap" aria-labelledby="feed-label">
+          <h2 class="sec-label" id="feed-label">
+            Latest
+          </h2>
+          <FeedList items={items} />
+        </section>
+        <PreviewPanel items={items} />
+      </div>
+    )
+  }
+</Base>
+
+<style>
+  .hero {
+    border-bottom: var(--hairline);
+  }
+
+  /* The field is bounded by the two hairlines, never cut in mid-air. */
+  .grid {
+    display: grid;
+  }
+
+  .txt {
+    padding-block: var(--s-8) var(--s-7);
+  }
+
+  .eyebrow {
+    margin-bottom: var(--s-4);
+  }
+
+  h1 {
+    max-width: 16ch;
+    margin-bottom: var(--s-5);
+  }
+
+  .intro {
+    max-width: 30rem;
+    font-size: var(--fs-lede);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .field {
+    aspect-ratio: 520 / 300;
+    margin-inline: calc(-1 * var(--gutter));
+    border-top: var(--hairline);
+  }
+
+  /* The preview panel takes the first (left) column: the aside brings
+     order: -1, so the DOM and the keyboard order stay feed-first. */
+  .body-grid {
+    display: grid;
+    grid-template-columns: 21rem minmax(0, 1fr);
+    column-gap: var(--s-6);
+    border-bottom: var(--hairline);
+  }
+
+  .sec-label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-block: var(--s-5) var(--s-3);
+  }
+
+  @media (min-width: 64em) {
+    .grid {
+      grid-template-columns: 1.1fr 1fr;
+      column-gap: var(--s-6);
+    }
+
+    .txt {
+      align-self: center;
+      padding-block: var(--s-8);
+    }
+
+    .field {
+      aspect-ratio: auto;
+      min-height: 22rem;
+      margin-inline: 0 calc(-1 * var(--gutter));
+      border-top: 0;
+      border-inline: var(--hairline);
+    }
+  }
+
+  @media (max-width: 52rem) {
+    .body-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
