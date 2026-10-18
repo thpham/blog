@@ -1,8 +1,13 @@
 ---
-// Temporary home: exercises the base layout, type contrasts and the
-// isoline field until the real home page lands (Task 9).
+// Home (spec §7.6): the hero, the unified feed of writing and lab entries,
+// and the sticky preview panel beside it. All relief is drawn at build time;
+// the preview swap is the page's only JavaScript besides the theme toggle.
+import FeedList from "../components/FeedList.astro";
 import Isolines from "../components/Isolines.astro";
+import PreviewPanel from "../components/PreviewPanel.astro";
 import Base from "../layouts/Base.astro";
+import { latestFeed, type FeedItem } from "../lib/content";
+import { visibleLab, visibleWriting } from "../lib/queries";
 import { contourField, levels, terrainField, type Source } from "../lib/isolines";
 import { SITE } from "../lib/site";
 
@@ -15,6 +20,17 @@ const sources: Source[] = [
   [140, 240, 0.45, 45],
 ];
 const contours = contourField(terrainField(sources, 0), W, H, levels(0.06, 1.2, 0.065));
+
+/** Feed rows extend FeedItem with the writing entry's topics for the panel. */
+type FeedRow = FeedItem & { topics?: { label: string; slug: string }[] };
+
+const writing = await visibleWriting();
+const lab = await visibleLab();
+const topicsOf = new Map(writing.map((e) => [e.id, e.data.topics]));
+const items: FeedRow[] = latestFeed(writing, lab).map((item) => ({
+  ...item,
+  topics: item.kind === "writing" ? (topicsOf.get(item.id) ?? []) : undefined,
+}));
 ---
 
 <Base
@@ -36,6 +52,20 @@ const contours = contourField(terrainField(sources, 0), W, H, levels(0.06, 1.2, 
       </div>
     </div>
   </section>
+
+  {
+    items.length > 0 && (
+      <div class="wrap body-grid">
+        <section class="feedwrap" aria-labelledby="feed-label">
+          <h2 class="sec-label" id="feed-label">
+            Latest
+          </h2>
+          <FeedList items={items} />
+        </section>
+        <PreviewPanel items={items} />
+      </div>
+    )
+  }
 </Base>
 
 <style>
@@ -74,6 +104,24 @@ const contours = contourField(terrainField(sources, 0), W, H, levels(0.06, 1.2, 
     border-top: var(--hairline);
   }
 
+  .body-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 21rem;
+    column-gap: var(--s-6);
+    border-bottom: var(--hairline);
+  }
+
+  .sec-label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-block: var(--s-5) var(--s-3);
+  }
+
   @media (min-width: 64em) {
     .grid {
       grid-template-columns: 1.1fr 1fr;
@@ -91,6 +139,12 @@ const contours = contourField(terrainField(sources, 0), W, H, levels(0.06, 1.2, 
       margin-inline: 0 calc(-1 * var(--gutter));
       border-top: 0;
       border-inline: var(--hairline);
+    }
+  }
+
+  @media (max-width: 52rem) {
+    .body-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
