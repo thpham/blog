@@ -50,6 +50,16 @@ const jsonLd = Astro.props.jsonLd ?? fm?.jsonLd;
 </Base>
 
 <style>
+  /* Matches the index pages' head (Writing, Lab, Radar), so the titles
+     across the main pages start at the same height. */
+  .page-head {
+    padding-block: var(--s-8) var(--s-6);
+  }
+
+  .eyebrow {
+    margin-bottom: var(--s-4);
+  }
+
   .body {
     padding-block: var(--s-7) var(--s-9);
   }

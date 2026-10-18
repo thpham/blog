@@ -288,7 +288,7 @@ const elsewhere = [
   }
 
   .lede {
-    max-width: 40rem;
+    max-width: 45rem;
     margin-top: var(--s-5);
     font-size: var(--fs-lede);
     line-height: 1.55;
@@ -301,7 +301,7 @@ const elsewhere = [
     margin-top: var(--s-6);
     padding-top: var(--s-4);
     border-top: var(--hairline);
-    max-width: 40rem;
+    max-width: 45rem;
   }
 
   .facts > div {
@@ -424,7 +424,7 @@ const elsewhere = [
   .end {
     display: grid;
     row-gap: var(--s-7);
-    max-width: 40rem;
+    max-width: 45rem;
     padding-top: var(--s-5);
   }
 
@@ -474,10 +474,10 @@ const elsewhere = [
   @media (min-width: 64em) {
     /* Column 1 is the prose width, so the title, the text and the end
        matter share one left and one right edge, and the terrain sits above
-       the rail. Column 2's rail is pushed to the far right, flush with the
-       banner's right edge, leaving the prose column as wide as possible. */
+       the rail. The rail sits just past the text at its original place next
+       to the prose, not flush right (Thomas's checkpoint decision). */
     .head {
-      grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 45rem) minmax(0, 1fr);
       column-gap: var(--s-8);
     }
 
@@ -499,7 +499,7 @@ const elsewhere = [
     }
 
     .article-body {
-      grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 45rem) minmax(0, 1fr);
       column-gap: var(--s-8);
       padding-top: var(--s-8);
     }
@@ -513,8 +513,6 @@ const elsewhere = [
       grid-column: 2;
       grid-row: 1 / span 2;
       max-width: 17rem;
-      justify-self: end;
-      margin-right: calc(-1 * var(--gutter));
     }
 
     .toc {
