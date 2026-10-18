@@ -40,9 +40,19 @@ import Base from "../layouts/Base.astro";
 </script>
 
 <style>
+  /* Page-head spacing matches Page.astro — same title start height as
+     Writing, Lab and Radar; the search box below owns no extra top pad. */
+  .page-head {
+    padding-block: var(--s-8) var(--s-6);
+  }
+
+  .eyebrow {
+    margin-bottom: var(--s-4);
+  }
+
   .search {
     max-width: 44rem;
-    padding-block: var(--s-6) var(--s-9);
+    padding-block: 0 var(--s-9);
   }
 
   /* The Pagefind UI takes the design tokens as its own: the variables it

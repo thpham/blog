@@ -168,7 +168,7 @@ const terrain = terrainFor(`radar/${entry.id}`, TW, TH);
   }
 
   .lede {
-    max-width: 40rem;
+    max-width: 45rem;
     margin-top: var(--s-5);
     font-size: var(--fs-lede);
     line-height: 1.55;
@@ -212,15 +212,19 @@ const terrain = terrainFor(`radar/${entry.id}`, TW, TH);
 
   /* ---------- body ---------- */
 
+  /* .article-body is the page .wrap (title-aligned inner edges); the body
+     children carry the measure instead of the wrap, so they start on the
+     same line as the title and the banner's left edge. */
   .article-body {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     row-gap: var(--s-7);
     padding-top: var(--s-7);
-    /* .wrap centers with auto margins; the radar body is a column, so anchor
-       it left, in line with the title, not centered over that column. */
-    max-width: 40rem;
-    margin-inline: 0 auto;
+  }
+
+  .history,
+  .end {
+    max-width: 45rem;
   }
 
   .history .entries li {
@@ -267,7 +271,7 @@ const terrain = terrainFor(`radar/${entry.id}`, TW, TH);
 
   @media (min-width: 64em) {
     .head {
-      grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 45rem) minmax(0, 1fr);
       column-gap: var(--s-8);
     }
 
