@@ -1,0 +1,285 @@
+---
+/**
+ * Radar list (spec §6.3, §7.8): the chart as one build-time SVG, then the
+ * same positions as an accessible list grouped by the four quadrants — one
+ * row per technology, mono facts with the current ring and the recent
+ * movement. With no entry the page falls back to the /lab empty state.
+ */
+import RadarChart from "../../components/RadarChart.astro";
+import LangBadge from "../../components/LangBadge.astro";
+import Base from "../../layouts/Base.astro";
+import { isoDate, monthYear } from "../../lib/format";
+import { entryUrl } from "../../lib/ids";
+import { QUADRANTS, movement } from "../../lib/radar";
+import { visibleRadar } from "../../lib/queries";
+
+const entries = await visibleRadar();
+
+/** All four groups render, but only when the collection is non-empty. */
+const groups = QUADRANTS.map((quadrant) => ({
+  quadrant,
+  entries: entries.filter((e) => e.data.quadrant === quadrant.id),
+}));
+
+/**
+ * Latest move of an entry, as the chart and the list read it: "moved" or
+ * "new" when the latest history entry is inside the 90-day window.
+ */
+function latestMove(entry: (typeof entries)[number]) {
+  return movement(
+    entry.data.history.map((h) => ({ date: h.date, ring: h.ring })),
+    new Date(),
+  );
+}
+
+/** The most recent history entry, whatever order the YAML lists them in. */
+function latestHistory(entry: (typeof entries)[number]) {
+  return [...entry.data.history].sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+}
+
+const noun = entries.length === 1 ? "technology" : "technologies";
+---
+
+<Base
+  title="Radar"
+  description="Thomas Pham's tech radar: the technologies in view, positioned on four rings across four quadrants, each with a mini-note and its dated history."
+>
+  <header class="page-head">
+    <div class="wrap">
+      <p class="eyebrow">Signal</p>
+      <h1 class="display">Radar</h1>
+      <div class="intro">
+        <p>
+          The technologies I hold in view, set on four rings with Adopt at the centre. Every point
+          carries a mini-note and its dated history — the radar is a living map, not a one-shot
+          verdict.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    {
+      entries.length === 0 ? (
+        <div class="empty">
+          <p>No technology is being tracked yet.</p>
+        </div>
+      ) : (
+        <>
+          <figure class="chart" lang="en">
+            <RadarChart
+              blips={entries.map((e) => ({
+                id: e.id,
+                name: e.data.name,
+                quadrant: e.data.quadrant,
+                ring: e.data.ring,
+                movement: latestMove(e),
+              }))}
+            />
+            <figcaption lang="en">
+              {entries.length} {noun} · rings from Adopt, at the centre, outwards to Hold
+            </figcaption>
+          </figure>
+          <section class="list" aria-label="The radar as text, grouped by quadrant">
+            {
+              groups.map((group) => (
+                <section class="group" aria-labelledby={`quadrant-${group.quadrant.id}`}>
+                  <h2 id={`quadrant-${group.quadrant.id}`}>{group.quadrant.label}</h2>
+                  {group.entries.length === 0 ? (
+                    <p class="none">No entry in this quadrant yet.</p>
+                  ) : (
+                    <ol role="list" class="rows">
+                      {group.entries.map((e) => (
+                        <li class="row">
+                          <time class="date" datetime={isoDate(latestHistory(e).date)}>
+                            {isoDate(latestHistory(e).date)}
+                          </time>
+                          <div class="body">
+                            <h3 class="title serif" lang={e.data.lang}>
+                              <a href={entryUrl("radar", e.id)}>{e.data.name}</a>
+                            </h3>
+                            <p class="facts">
+                              <span class="ring" data-ring={e.data.ring}>
+                                {e.data.ring[0].toUpperCase() + e.data.ring.slice(1)}
+                              </span>
+                              <span class="sep" aria-hidden="true">·</span>
+                              <LangBadge lang={e.data.lang} />
+                              {latestMove(e) && (
+                                <>
+                                  <span class="sep" aria-hidden="true">·</span>
+                                  <span
+                                    class="move"
+                                    data-move={latestMove(e)}
+                                  >
+                                    {latestMove(e)}{" "}
+                                    <time datetime={isoDate(latestHistory(e).date)}>
+                                      {monthYear(latestHistory(e).date)}
+                                    </time>
+                                  </span>
+                                </>
+                              )}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </section>
+              ))
+            }
+          </section>
+        </>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .page-head {
+    padding-block: var(--s-8) var(--s-6);
+  }
+
+  .eyebrow {
+    margin-bottom: var(--s-4);
+  }
+
+  h1 {
+    max-width: 18ch;
+  }
+
+  .intro {
+    max-width: 38rem;
+    margin-top: var(--s-5);
+    font-size: var(--fs-lede);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .chart {
+    margin-block: 0;
+    max-width: 44rem;
+  }
+
+  .chart figcaption {
+    margin-top: var(--s-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .list {
+    display: grid;
+    row-gap: var(--s-5);
+    margin-top: var(--s-6);
+  }
+
+  .group h2 {
+    max-width: 22ch;
+    font-size: var(--fs-title);
+    font-weight: 400;
+    margin-bottom: var(--s-2);
+  }
+
+  .none,
+  .date,
+  .facts,
+  .move {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .none {
+    padding-block: var(--s-3);
+    border-bottom: var(--hairline);
+  }
+
+  .rows {
+    border-bottom: var(--hairline);
+  }
+
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: var(--s-2);
+    padding-block: var(--s-5);
+    border-top: var(--hairline);
+  }
+
+  .title {
+    font-size: var(--fs-title);
+    font-weight: 400;
+    line-height: var(--lh-title);
+    letter-spacing: -0.005em;
+  }
+
+  .title a {
+    text-decoration: none;
+  }
+
+  /* The whole row is clickable; the title stays the only link. */
+  .title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .row:hover .title a,
+  .title a:focus-visible {
+    color: var(--accent);
+  }
+
+  .title a:focus-visible {
+    outline: none;
+  }
+
+  .row:has(.title a:focus-visible) {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.5em;
+    row-gap: var(--s-1);
+    margin-top: var(--s-2);
+  }
+
+  .ring {
+    color: var(--text);
+  }
+
+  .sep {
+    color: var(--line);
+  }
+
+  .move {
+    color: var(--accent);
+  }
+
+  .empty {
+    display: block;
+    padding-block: var(--s-6);
+    border-block: var(--hairline);
+    color: var(--muted);
+  }
+
+  @media (min-width: 40em) {
+    .row {
+      grid-template-columns: 7.5rem minmax(0, 1fr);
+      column-gap: var(--s-5);
+    }
+
+    .date {
+      padding-top: 0.4rem;
+    }
+  }
+</style>

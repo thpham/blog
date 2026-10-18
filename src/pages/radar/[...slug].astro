@@ -1,0 +1,291 @@
+---
+/**
+ * Radar mini-note (spec §6.3, §7.8): the technology's position in mono
+ * metadata, its own terrain, the dated history of its moves and the note as
+ * prose. The ring is the latest history entry's — the content schema
+ * enforces the match.
+ */
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Isolines from "../../components/Isolines.astro";
+import LangBadge from "../../components/LangBadge.astro";
+import Base from "../../layouts/Base.astro";
+import { isoDate, monthYear } from "../../lib/format";
+import { QUADRANTS, movement } from "../../lib/radar";
+import { terrainFor } from "../../lib/isolines";
+import { visibleRadar } from "../../lib/queries";
+import "../../styles/prose.css";
+
+export const getStaticPaths = (async () => {
+  const entries = await visibleRadar();
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+
+const quadrant = QUADRANTS.find((q) => q.id === data.quadrant)!;
+const ringLabel = (ring: string) => ring[0].toUpperCase() + ring.slice(1);
+const currentRing = ringLabel(data.ring);
+
+const history = [...data.history].sort((a, b) => b.date.getTime() - a.date.getTime());
+const move = movement(history, new Date());
+
+const TW = 520;
+const TH = 300;
+const terrain = terrainFor(`radar/${entry.id}`, TW, TH);
+---
+
+<Base
+  title={data.name}
+  description={`${data.name} — ${quadrant.label}, ring ${currentRing.toLowerCase()} on Thomas Pham's tech radar.`}
+  lang={data.lang}
+  noindex={data.demo}
+>
+  <article class="article">
+    <header class="radar-head">
+      <div class="wrap head">
+        <div class="head-text">
+          <p class="radar-meta" lang="en" data-current-ring={data.ring} data-movement={move}>
+            <span>{quadrant.label}</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <LangBadge lang={data.lang} />
+          </p>
+          <h1 class="serif article-title">{data.name}</h1>
+          <p class="lede">
+            In the <strong class="ring-word" data-ring={data.ring}>{currentRing}</strong> ring
+            since <time datetime={isoDate(history[0].date)}>{isoDate(history[0].date)}</time>.
+          </p>
+          {
+            move && (
+              <p class="move" lang="en" data-move={move}>
+                {move === "new" ? "New in the radar" : "Moved recently"} ·
+                <time datetime={isoDate(history[0].date)}>{monthYear(history[0].date)}</time>
+              </p>
+            )
+          }
+        </div>
+        <div class="terrain" aria-hidden="true">
+          <Isolines
+            contours={terrain.contours}
+            sources={terrain.sources}
+            width={TW}
+            height={TH}
+            opacity={0.42}
+          />
+          <p class="coord">
+            <span>terrain #{terrain.seed}</span>
+            <span>{terrain.sources.length} nodes</span>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap article-body">
+      <div class="prose">
+        <Content />
+      </div>
+
+      <section class="history" aria-labelledby="history-title">
+        <h2 id="history-title" class="end-label">History</h2>
+        <ol role="list" class="entries">
+          {
+            history.map((h) => (
+              <li>
+                <time class="date" datetime={isoDate(h.date)}>
+                  {isoDate(h.date)}
+                </time>
+                <span class="ring" data-ring={h.ring}>
+                  {ringLabel(h.ring)}
+                </span>
+                {h.note && <p class="note">{h.note}</p>}
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <footer class="end" lang="en">
+        <p class="back">
+          <a href="/radar">
+            <span aria-hidden="true">←</span> All radar entries
+          </a>
+        </p>
+      </footer>
+    </div>
+  </article>
+</Base>
+
+<style>
+  /* ---------- header ---------- */
+
+  .radar-head {
+    border-bottom: var(--hairline);
+  }
+
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .head-text {
+    padding-block: var(--s-7) var(--s-6);
+  }
+
+  .radar-meta,
+  .move,
+  .coord,
+  .date,
+  .end {
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .radar-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.55em;
+    margin-bottom: var(--s-5);
+  }
+
+  .sep {
+    color: var(--line);
+  }
+
+  .article-title {
+    max-width: 22ch;
+    font-size: clamp(2.125rem, 1.5rem + 2.6vw, 3.25rem);
+    font-weight: 300;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+  }
+
+  .lede {
+    max-width: 35rem;
+    margin-top: var(--s-5);
+    font-size: var(--fs-lede);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .ring-word {
+    font-weight: inherit;
+    color: var(--accent);
+  }
+
+  .move {
+    margin-top: var(--s-3);
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: var(--track-meta);
+  }
+
+  .terrain {
+    position: relative;
+    aspect-ratio: 520 / 220;
+    margin-inline: calc(-1 * var(--gutter));
+    border-top: var(--hairline);
+    order: -1;
+  }
+
+  .coord {
+    position: absolute;
+    inset: auto var(--gutter) var(--s-2);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.625rem;
+  }
+
+  /* Keep the caption legible where a contour runs under it. */
+  .coord span {
+    padding: 0.1em 0.35em;
+    margin-inline: -0.35em;
+    background: var(--bg);
+  }
+
+  /* ---------- body ---------- */
+
+  .article-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--s-7);
+    padding-top: var(--s-7);
+    max-width: 35rem;
+  }
+
+  .history .entries li {
+    display: grid;
+    grid-template-columns: 7.5rem auto minmax(0, 1fr);
+    column-gap: var(--s-4);
+    align-items: baseline;
+    padding-block: var(--s-3);
+    border-bottom: var(--hairline);
+  }
+
+  .history .entries {
+    border-top: var(--hairline);
+  }
+
+  .history .ring {
+    color: var(--accent);
+  }
+
+  .history .note {
+    grid-column: 2 / 4;
+    font-size: 0.9375rem;
+  }
+
+  .end-label {
+    margin-bottom: var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .back a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .back a:hover {
+    color: var(--text);
+  }
+
+  @media (min-width: 64em) {
+    .head {
+      grid-template-columns: minmax(0, 35rem) minmax(0, 1fr);
+      column-gap: var(--s-8);
+    }
+
+    .head-text {
+      padding-block: var(--s-8) var(--s-7);
+    }
+
+    .terrain {
+      order: 0;
+      aspect-ratio: auto;
+      min-height: 20rem;
+      margin-inline: 0 calc(-1 * var(--gutter));
+      border-top: 0;
+      border-left: var(--hairline);
+    }
+
+    .coord {
+      inset: auto var(--s-4) var(--s-3);
+    }
+
+    .article-body {
+      padding-top: var(--s-8);
+    }
+  }
+</style>
