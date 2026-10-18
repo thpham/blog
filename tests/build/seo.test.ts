@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { demoUrls } from "../../src/lib/demo";
@@ -60,6 +61,52 @@ describe("feeds", () => {
     expect(xml).not.toMatch(/<item>/);
     for (const url of SITE_URLS) expect(xml).not.toContain(url);
   });
+
+  it(
+    "emits link/guid/pubDate/description per item for a published entry (positive build)",
+    () => {
+      // Today's shipped content is demo-only, so a real feed item only shows
+      // up with a temporary non-demo entry. The build is redirected to
+      // dist-smoke (astro.config.mjs) so it never races the dist/ the other
+      // tests read concurrently.
+      const smokeDir = fileURLToPath(new URL("../../dist-smoke", import.meta.url));
+      const entryPath = fileURLToPath(new URL("../../src/content/writing/zz-rss-smoke.md", import.meta.url));
+      writeFileSync(
+        entryPath,
+        [
+          "---",
+          'title: "RSS smoke entry"',
+          'description: "Temporary entry proving the feed layer emits full items."',
+          "date: 2026-10-18",
+          "lang: en",
+          "topics: [Meta]",
+          "horizon: false",
+          "---",
+          "",
+          "Body of the RSS smoke entry.",
+          "",
+        ].join("\n"),
+      );
+      try {
+        execFileSync("yarn", ["astro", "build"], {
+          env: { ...process.env, ITHINGS_SMOKE_OUT: "dist-smoke" },
+          stdio: "pipe",
+        });
+        const xml = text(smokeDir, "rss.xml");
+        // @astrojs/rss normalises item URLs to a trailing slash.
+        const url = "https://blog.ithings.ch/writing/zz-rss-smoke/";
+        expect(xml).toContain(`<link>${url}</link>`);
+        expect(xml).toContain(`<guid isPermaLink="true">${url}</guid>`);
+        expect(xml).toMatch(/<pubDate>[^<]+<\/pubDate>/);
+        expect(xml).toMatch(/<description>[^<]+<\/description>/);
+        for (const demo of DEMO_URLS) expect(xml).not.toContain(demo);
+      } finally {
+        rmSync(entryPath, { force: true });
+        rmSync(smokeDir, { recursive: true, force: true });
+      }
+    },
+    300_000,
+  );
 });
 
 describe("llms.txt", () => {
@@ -121,6 +168,27 @@ describe("meta layer", () => {
 
   it("emits hreflang only when a translationOf exists (none today), so none", () => {
     expect(welcome).not.toContain("hreflang");
+  });
+
+  it("carries Person JSON-LD, og:image, twitter:card and canonical on the home page", () => {
+    const home = text(distDir, "index.html");
+    const match = home.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/);
+    expect(match).not.toBeNull();
+    const person = JSON.parse((match as RegExpMatchArray)[1]);
+    expect(person["@type"]).toBe("Person");
+    expect(person.name).toBe("Thomas Pham");
+    expect(person.jobTitle).toBeUndefined();
+    expect(person.worksFor).toBeUndefined();
+    expect(home).toMatch(/property="og:image" content="https:\/\/blog\.ithings\.ch\/og\/home\.png"/);
+    expect(home).toContain('name="twitter:card" content="summary_large_image"');
+    expect(home).toMatch(/rel="canonical" href="https:\/\/blog\.ithings\.ch\/"/);
+  });
+
+  it("ships the home OG card", () => {
+    const buffer = png(distDir, "og/home.png");
+    expect([...buffer.subarray(0, 4)]).toEqual([137, 80, 78, 71]);
+    expect(buffer.readUInt32BE(16)).toBe(1200);
+    expect(buffer.readUInt32BE(20)).toBe(630);
   });
 });
 

@@ -1,6 +1,7 @@
 # Production
 dist/
 dist-nodemo/
+dist-smoke/
 
 # Generated files
 .astro/

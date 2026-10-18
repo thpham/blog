@@ -16,7 +16,10 @@ const demo = demoUrls(fileURLToPath(new URL("./src/content", import.meta.url)));
 export default defineConfig({
   site: "https://blog.ithings.ch",
   trailingSlash: "never",
-  outDir: process.env.ITHINGS_NO_DEMO ? "dist-nodemo" : "dist",
+  // ITHINGS_SMOKE_OUT: a build test (tests/build/seo.test.ts) builds a
+  // one-off site with a temporary entry, so it redirects the output away
+  // from dist/ — the other build tests read dist/ concurrently.
+  outDir: process.env.ITHINGS_SMOKE_OUT ?? (process.env.ITHINGS_NO_DEMO ? "dist-nodemo" : "dist"),
   build: {
     format: "file",
   },

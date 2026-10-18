@@ -63,11 +63,14 @@ function frontmatter(d: {
     if (d.poc.demo) lines.push(`  demo: ${d.poc.demo}`);
     if (d.poc.slides) lines.push(`  slides: ${d.poc.slides}`);
   }
+  // One `related:` key carrying both sub-lists — YAML, like the schema,
+  // has a single mapping entry per name.
   const lab = d.related?.lab ?? [];
-  if (lab.length > 0) lines.push("related:", "  lab:", ...lab.map((r) => `    - ${r.id}`));
   const radar = d.related?.radar ?? [];
-  if (radar.length > 0) {
-    lines.push("related:", "  radar:", ...radar.map((r) => `    - ${r.id}`));
+  if (lab.length > 0 || radar.length > 0) {
+    lines.push("related:");
+    if (lab.length > 0) lines.push("  lab:", ...lab.map((r) => `    - ${r.id}`));
+    if (radar.length > 0) lines.push("  radar:", ...radar.map((r) => `    - ${r.id}`));
   }
   if (d.translationOf) lines.push(`translationOf: ${d.translationOf.id}`);
   lines.push("---", "");

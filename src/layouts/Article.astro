@@ -80,7 +80,7 @@ const elsewhere = [
   lang={data.lang}
   noindex={data.demo}
   ogImage={`/og/writing/${entry.id}.png`}
-  jsonLd={data.demo ? undefined : (postingJsonLd(entry) as Record<string, unknown>)}
+  jsonLd={data.demo ? undefined : postingJsonLd(entry)}
   alternates={translations.map((t) => ({ hreflang: t.data.lang, href: entryUrl("writing", t.id) }))}
 >
   <article class="article" data-pagefind-ignore={data.demo ? "" : undefined}>

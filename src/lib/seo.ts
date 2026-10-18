@@ -20,7 +20,7 @@ export interface PostingInput {
 }
 
 /** The site owner as schema.org sees them: name, place, profiles, fields. */
-export function personJsonLd(): object {
+export function personJsonLd(): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -41,7 +41,7 @@ export function personJsonLd(): object {
 }
 
 /** A writing entry as a schema.org BlogPosting, with its OG image. */
-export function postingJsonLd(entry: PostingInput): object {
+export function postingJsonLd(entry: PostingInput): Record<string, unknown> {
   const { id, data } = entry;
   return {
     "@context": "https://schema.org",

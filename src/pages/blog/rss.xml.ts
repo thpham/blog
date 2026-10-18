@@ -13,6 +13,13 @@ export async function GET(context: APIContext) {
     title: `${SITE.name} (blog)`,
     description: "Field notes by Thomas Pham on platforms, connected things and the AI woven through both.",
     site: context.site!,
-    items,
+    // @astrojs/rss consumes { link, pubDate, description } and silently
+    // drops unknown keys, so our FeedEntry shape maps onto it here.
+    items: items.map(({ url, title, date, summary }) => ({
+      link: url,
+      title,
+      pubDate: date,
+      description: summary,
+    })),
   });
 }

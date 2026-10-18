@@ -1069,10 +1069,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagefind/default-ui@npm:1.1.0":
-  version: 1.1.0
-  resolution: "@pagefind/default-ui@npm:1.1.0"
-  checksum: 10c0/6443644ecfe1c9a69375b1cf0a0d1e86330befbd626b558cee8d30598345dc4f89addb7c3955de724ba21ffa035312e0083495ac16f734b442be8d26494217e3
+"@pagefind/default-ui@npm:1.5.2":
+  version: 1.5.2
+  resolution: "@pagefind/default-ui@npm:1.5.2"
+  checksum: 10c0/2e4add8f315b6ceb2355b635bf1bbc1fc84e4d3d1dadafc38696184aff1d459720a8efcb843d58ae798a30512859620960a671311ff8e197d0a67b43c47fdeef
   languageName: node
   linkType: hard
 
@@ -2215,7 +2215,7 @@ __metadata:
     "@excalidraw/utils": "npm:0.1.5"
     "@fontsource/instrument-sans": "npm:5.3.0"
     "@fontsource/newsreader": "npm:5.3.0"
-    "@pagefind/default-ui": "npm:1.1.0"
+    "@pagefind/default-ui": "npm:1.5.2"
     "@resvg/resvg-js": "npm:2.6.2"
     astro: "npm:^7.4.0"
     astro-expressive-code: "npm:^0.44.2"

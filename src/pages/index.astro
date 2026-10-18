@@ -8,6 +8,7 @@ import PreviewPanel from "../components/PreviewPanel.astro";
 import Base from "../layouts/Base.astro";
 import { latestFeed, type FeedItem } from "../lib/content";
 import { visibleLab, visibleWriting } from "../lib/queries";
+import { personJsonLd } from "../lib/seo";
 import { contourField, levels, terrainField, type Source } from "../lib/isolines";
 import { SITE } from "../lib/site";
 
@@ -36,6 +37,8 @@ const items: FeedRow[] = latestFeed(writing, lab).map((item) => ({
 <Base
   title={SITE.name}
   description="Field notes by Thomas Pham on platforms, connected things and the AI woven through both."
+  ogImage="/og/home.png"
+  jsonLd={personJsonLd()}
 >
   <section class="hero">
     <div class="wrap grid">

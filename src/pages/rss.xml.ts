@@ -10,10 +10,17 @@ import { SITE } from "../lib/site";
 export async function GET(context: APIContext) {
   const items = await feedEntries();
   return rss({
+    // @astrojs/rss consumes { link, pubDate, description } and silently
+    // drops unknown keys, so our FeedEntry shape maps onto it here.
+    items: items.map(({ url, title, date, summary }) => ({
+      link: url,
+      title,
+      pubDate: date,
+      description: summary,
+    })),
     title: SITE.name,
     description: "Field notes by Thomas Pham on platforms, connected things and the AI woven through both.",
     site: context.site!,
-    items,
     customData: "<generator>ithings</generator>",
   });
 }
