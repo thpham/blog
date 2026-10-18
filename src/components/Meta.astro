@@ -62,7 +62,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, "\\u003c") : undefined;
 <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
 <meta name="twitter:site" content={`@${SITE.socials.x}`} />
 
-<Font cssVariable="--font-serif" preload={[{ style: "normal" }]} />
+<Font cssVariable="--font-serif" preload={[{ style: "normal" }, { style: "italic" }]} />
 <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
 <Font cssVariable="--font-mono" />
 
