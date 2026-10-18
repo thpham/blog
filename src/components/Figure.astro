@@ -6,6 +6,9 @@
  * close button, and the browser returns focus to the opener. The large
  * file is only fetched when the dialog opens.
  *
+ * The figure frame and its numbered caption are styled in prose.css,
+ * shared with Excalidraw.astro.
+ *
  * In MDX, import the image next to the article and pass it:
  * `<Figure src={shot} alt="…" caption="…" />`.
  */
@@ -70,10 +73,6 @@ const large =
 </script>
 
 <style>
-  .figure {
-    margin-block: 2em;
-  }
-
   .zoom {
     display: block;
     width: 100%;
@@ -90,29 +89,6 @@ const large =
 
   .zoom:focus-visible {
     outline-offset: 4px;
-  }
-
-  figcaption {
-    display: flex;
-    gap: 0.75em;
-    margin-top: var(--s-3);
-    font-family: var(--font-sans);
-    font-size: var(--fs-small);
-    line-height: 1.5;
-    color: var(--muted);
-  }
-
-  /* Figures are numbered in reading order across the article. */
-  figcaption::before {
-    counter-increment: figure;
-    content: "Fig. " counter(figure);
-    flex: none;
-    padding-top: 0.15em;
-    font-family: var(--font-mono);
-    font-size: var(--fs-meta);
-    letter-spacing: var(--track-meta);
-    text-transform: uppercase;
-    color: var(--text);
   }
 
   .zoomed {

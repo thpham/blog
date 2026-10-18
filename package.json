@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "build:nodemo": "ITHINGS_NO_DEMO=1 astro build",
+    "predev": "node tools/excalidraw/export.mjs",
+    "dev": "yarn predev && astro dev",
+    "prebuild": "node tools/excalidraw/export.mjs",
+    "build": "yarn prebuild && astro build",
+    "build:nodemo": "yarn prebuild && ITHINGS_NO_DEMO=1 astro build",
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run tests/unit --passWithNoTests",
@@ -17,11 +19,15 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.4.0",
-    "astro-expressive-code": "^0.44.2"
+    "astro-expressive-code": "^0.44.2",
+    "mermaid-isomorphic": "3.1.0",
+    "playwright": "1.64.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@emnapi/runtime": "^1.11.3",
+    "@excalidraw/utils": "0.1.5",
+    "satteri": "^0.10.5",
     "typescript": "~5.9.3",
     "vitest": "^5.0.5"
   },

@@ -1,0 +1,11 @@
+/*
+ * Loaded only into the headless page where Mermaid renders (see
+ * mermaid-themed.ts), so that labels are measured with the face the site
+ * shows them in. Never shipped to the browser.
+ */
+@font-face {
+  font-family: "ithings-diagram-sans";
+  src: url("../../tools/logo/InstrumentSans.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+}

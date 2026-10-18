@@ -199,6 +199,53 @@
   scrollbar-width: thin;
 }
 
+/* ---------- figures and diagrams ---------- */
+
+/* Figure (images) and Excalidraw share the frame and the numbered
+   caption: figures are numbered in reading order across the article. */
+.prose figure {
+  margin-block: 2em;
+}
+
+.prose figcaption {
+  display: flex;
+  gap: 0.75em;
+  margin-top: var(--s-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.prose figcaption::before {
+  counter-increment: figure;
+  content: "Fig. " counter(figure);
+  flex: none;
+  padding-top: 0.15em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--track-meta);
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+/* Mermaid: labels were measured in the plain sans face, so the running
+   text settings must not reach them. */
+.prose .diagram {
+  margin-block: 2em;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: normal;
+  font-variant-numeric: normal;
+  hanging-punctuation: none;
+  overflow-wrap: normal;
+}
+
+.prose .diagram svg {
+  margin-inline: auto;
+  height: auto;
+}
+
 /* ---------- tables ---------- */
 
 .prose table {

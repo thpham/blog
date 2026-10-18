@@ -10,6 +10,7 @@
  * stay English and say so with lang="en".
  */
 import { getCollection, getEntry, render } from "astro:content";
+import Excalidraw from "../components/Excalidraw.astro";
 import Figure from "../components/Figure.astro";
 import Isolines from "../components/Isolines.astro";
 import LangBadge from "../components/LangBadge.astro";
@@ -178,7 +179,7 @@ const elsewhere = [
       }
 
       <div class="prose">
-        <Content components={{ Figure, Slides }} />
+        <Content components={{ Excalidraw, Figure, Slides }} />
       </div>
 
       <footer class="end" lang="en">

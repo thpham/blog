@@ -150,6 +150,28 @@ a:hover {
   border-radius: 2px;
 }
 
+/* ---------- per-theme variants ---------- */
+
+/* Build-time diagrams (Mermaid, Excalidraw) ship one rendering per theme:
+   show the one matching html[data-theme], or the system preference when
+   JavaScript never set it, like the tokens. */
+[data-theme="dark"] .only-light,
+[data-theme="light"] .only-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .only-light {
+    display: none;
+  }
+}
+
+@media not all and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .only-dark {
+    display: none;
+  }
+}
+
 /* ---------- layout ---------- */
 
 .wrap {
