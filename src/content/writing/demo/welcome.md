@@ -1,9 +1,16 @@
 ---
-slug: welcome
 title: Welcome to iThings Blog
 description: A new blog dedicated to IaC, Containerization, Cloud, SRE/Platform, Linux, and IoT.
-authors: [thpham]
-tags: [announcement]
+date: 2024-12-18
+lang: en
+topics:
+  - Infrastructure as Code
+  - Kubernetes
+  - Cloud
+  - Platform Engineering
+  - NixOS
+  - IoT
+demo: true
 ---
 
 ![Welcome Image](welcome-banner.webp)
