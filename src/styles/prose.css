@@ -246,6 +246,15 @@
   height: auto;
 }
 
+/* Dev-server degrade for a diagram when no browser is available to render
+   it (mermaid-themed.ts): the source as text, plus a notice. Never built. */
+.prose .diagram-fallback .diagram-notice {
+  margin-block: var(--s-2) 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  color: var(--muted);
+}
+
 /* ---------- tables ---------- */
 
 .prose table {

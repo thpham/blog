@@ -8,7 +8,9 @@
  *
  * The Mermaid plugin is put first among the hast plugins, so it sees the
  * code block before Expressive Code highlights it, whatever the order of
- * the integrations.
+ * the integrations. In the dev server (`command === "dev"`), an unavailable
+ * browser degrades a diagram to its source as text; the production build
+ * must fail loud instead (tools/excalidraw/export.mjs, mermaid-themed.ts).
  */
 import type { AstroIntegration } from "astro";
 import { readThemePalettes } from "../lib/palette";
@@ -24,12 +26,14 @@ export function diagrams(): AstroIntegration {
   return {
     name: "ithings:diagrams",
     hooks: {
-      "astro:config:setup": ({ config }) => {
+      "astro:config:setup": ({ command, config }) => {
         const processor = config.markdown.processor as unknown as SatteriLike | undefined;
         if (processor?.name !== "satteri") {
           throw new Error("ithings:diagrams expects the Sätteri Markdown processor (Astro's default).");
         }
-        processor.options.hastPlugins.unshift(mermaidThemed({ palettes: readThemePalettes(config.root) }));
+        processor.options.hastPlugins.unshift(
+          mermaidThemed({ palettes: readThemePalettes(config.root), dev: command === "dev" }),
+        );
         processor.options.mdastPlugins.push(excalidrawSrc({ root: config.root }));
       },
     },

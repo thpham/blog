@@ -25,7 +25,8 @@
  *
  * Chromium: Playwright's own, or the binary named by ITHINGS_CHROMIUM (for
  * hosts where Playwright's build cannot run, such as NixOS; CI uses
- * Playwright's own browser).
+ * Playwright's own browser). Dev degrades without it (see `dev` below);
+ * production requires a browser.
  */
 import { createHash } from "node:crypto";
 import type { MermaidConfig } from "mermaid";
@@ -118,6 +119,18 @@ function getRenderer(): MermaidRenderer {
   return renderer;
 }
 
+/**
+ * A diagram mermaid itself could not render (syntax, unknown shape): a
+ * content bug that must surface in dev too. Distinct from a failed browser
+ * launch, which `renderThemedMermaid` degrades in dev (see `dev`).
+ */
+class MermaidRenderError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MermaidRenderError";
+  }
+}
+
 function digest(s: string): string {
   return createHash("sha256").update(s).digest("hex").slice(0, 8);
 }
@@ -131,10 +144,30 @@ async function renderOne(source: string, id: string, theme: Theme, palettes: The
   });
   if (result.status === "rejected") {
     const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
-    throw new Error(`Mermaid could not render this diagram (${theme}): ${reason}\n${source}`);
+    throw new MermaidRenderError(`Mermaid could not render this diagram (${theme}): ${reason}\n${source}`);
   }
   // Point the text at the page's font stack, which resolves to the same face.
   return result.value.svg.replace(new RegExp(`"?${MEASURE_FAMILY}"?`, "g"), "var(--font-sans)");
+}
+
+// ---------- dev degrade (no browser available) ----------
+
+const FALLBACK_NOTICE = "Diagram skipped (browser unavailable) — set ITHINGS_CHROMIUM or run the production build.";
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/** The diagram source as plain text, in place of the SVG; dev only, never built. */
+function fallbackDiagram(source: string): string {
+  return `<div class="diagram mermaid diagram-fallback"><pre>${escapeHtml(source)}</pre><p class="diagram-notice">${FALLBACK_NOTICE}</p></div>`;
+}
+
+let warned = false;
+
+/** Browser/page/environment failure, not a content bug: only thrown outside the per-diagram results. */
+function isLaunchFailure(error: unknown): boolean {
+  return !(error instanceof MermaidRenderError);
 }
 
 /** Both renders of a diagram, keyed by source: the dev server re-renders unchanged diagrams for free. */
@@ -143,16 +176,39 @@ const cache = new Map<string, Promise<string>>();
 /**
  * The themed HTML for one diagram. `key` tells apart diagrams on the same
  * page; the ids inside each SVG derive from it and from the theme.
+ *
+ * `dev` (the dev server): if the browser cannot be launched, the diagram
+ * degrades to its source as text with a one-line notice, and a warning is
+ * logged to the terminal; a real render failure still throws, as it is a
+ * content bug. In production any launch failure fails the build.
  */
-export function renderThemedMermaid(source: string, key: string, palettes: ThemePalettes): Promise<string> {
+export function renderThemedMermaid(
+  source: string,
+  key: string,
+  palettes: ThemePalettes,
+  dev: boolean = import.meta.env?.DEV === true,
+): Promise<string> {
   const id = `mermaid-${digest(source)}-${key}`;
   const cacheKey = `${id}\n${JSON.stringify(palettes)}\n${source}`;
   let html = cache.get(cacheKey);
   if (!html) {
-    html = Promise.all(THEMES.map((t) => renderOne(source, `${id}-${t}`, t, palettes))).then(
-      ([light, dark]) =>
-        `<div class="diagram mermaid"><div class="only-light">${light}</div><div class="only-dark">${dark}</div></div>`,
-    );
+    html = Promise.all(THEMES.map((t) => renderOne(source, `${id}-${t}`, t, palettes)))
+      .then(
+        ([light, dark]) =>
+          `<div class="diagram mermaid"><div class="only-light">${light}</div><div class="only-dark">${dark}</div></div>`,
+      )
+      .catch((error) => {
+        if (!dev || !isLaunchFailure(error)) throw error;
+        if (!warned) {
+          warned = true;
+          console.warn(
+            `[mermaid-themed] browser unavailable, diagrams are shown as their source: ${
+              error instanceof Error ? error.message : String(error)
+            }\n[mermaid-themed] set ITHINGS_CHROMIUM to a Chromium binary to render them in the dev server.`,
+          );
+        }
+        return fallbackDiagram(source);
+      });
     html.catch(() => cache.delete(cacheKey));
     cache.set(cacheKey, html);
   }
@@ -174,10 +230,16 @@ function mermaidCode(pre: HastElementLike): HastElementLike | undefined {
 
 export interface MermaidThemedOptions {
   palettes: ThemePalettes;
+  /**
+   * The dev server: a failed browser launch degrades to the diagram source as
+   * text (see renderThemedMermaid); elsewhere, i.e. in the production build,
+   * a failed launch fails the build. Defaults to import.meta.env.DEV.
+   */
+  dev?: boolean;
 }
 
 /** The Sätteri hast plugin. A factory: one counter per document. */
-export function mermaidThemed({ palettes }: MermaidThemedOptions): HastPluginEntry {
+export function mermaidThemed({ palettes, dev }: MermaidThemedOptions): HastPluginEntry {
   return () => {
     let count = 0;
     return {
@@ -188,7 +250,7 @@ export function mermaidThemed({ palettes }: MermaidThemedOptions): HastPluginEnt
           const code = mermaidCode(node as HastElementLike);
           if (!code) return;
           const source = ctx.textContent(code as never).replace(/\n$/, "");
-          const html = await renderThemedMermaid(source, String(count++), palettes);
+          const html = await renderThemedMermaid(source, String(count++), palettes, dev);
           ctx.replaceNode(
             node,
             ctx.sourceFormat === "mdx"
