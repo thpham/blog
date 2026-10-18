@@ -11,17 +11,24 @@ const DEMO_PREFIX = "demo/";
 const CONTENT_EXTENSION = /\.(md|mdx)$/;
 const COMBINING_DIACRITICS = /[̀-ͯ]/g;
 
+const INDEX_LEAF = /\/index$/;
+
 /**
  * Derives a collection entry id from a file path relative to the
- * collection's content directory: strips a leading `demo/` segment and the
- * markdown extension.
+ * collection's content directory: strips a leading `demo/` segment, the
+ * markdown extension, then a trailing `/index` — a folder-entry
+ * (`demo/building-this-site/index.mdx` next to its images) talks about the
+ * same article as its `demo/building-this-site.mdx` flat form, and the two
+ * shapes are interchangeable. A bare `index.md` at the collection root
+ * keeps the id `index` (nothing left to strip).
  *
  * `idFromPath('demo/welcome.md')` -> `'welcome'`
- * `idFromPath('nixos/index.mdx')` -> `'nixos/index'`
+ * `idFromPath('nixos/index.mdx')` -> `'nixos'`
+ * `idFromPath('nixos/post.md')` -> `'nixos/post'`
  */
 export function idFromPath(path: string): string {
   const withoutDemo = path.startsWith(DEMO_PREFIX) ? path.slice(DEMO_PREFIX.length) : path;
-  return withoutDemo.replace(CONTENT_EXTENSION, "");
+  return withoutDemo.replace(CONTENT_EXTENSION, "").replace(INDEX_LEAF, "");
 }
 
 /** Builds the public URL for a collection entry. */

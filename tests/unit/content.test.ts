@@ -8,7 +8,16 @@ describe("idFromPath", () => {
   });
 
   it("keeps nested segments outside demo/", () => {
-    expect(idFromPath("nixos/index.mdx")).toBe("nixos/index");
+    expect(idFromPath("tutorials/nixos/index.mdx")).toBe("tutorials/nixos");
+  });
+
+  it("treats a folder-as-entry directory as the entry itself", () => {
+    expect(idFromPath("demo/building-this-site/index.mdx")).toBe("building-this-site");
+    expect(idFromPath("nixos/index.md")).toBe("nixos");
+  });
+
+  it("keeps a bare index at the collection root usable", () => {
+    expect(idFromPath("index.md")).toBe("index");
   });
 });
 
