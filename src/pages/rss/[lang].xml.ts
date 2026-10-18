@@ -17,6 +17,9 @@ export async function GET(context: APIContext) {
   return rss({
     // @astrojs/rss consumes { link, pubDate, description } and silently
     // drops unknown keys, so our FeedEntry shape maps onto it here.
+    // trailingSlash: false — the site serves extensionless files, so a
+    // slashed URL would 404; match the sitemap and canonical tags.
+    trailingSlash: false,
     items: items.map(({ url, title, date, summary }) => ({
       link: url,
       title,

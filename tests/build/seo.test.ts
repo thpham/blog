@@ -93,8 +93,10 @@ describe("feeds", () => {
           stdio: "pipe",
         });
         const xml = text(smokeDir, "rss.xml");
-        // @astrojs/rss normalises item URLs to a trailing slash.
-        const url = "https://blog.ithings.ch/writing/zz-rss-smoke/";
+        // trailingSlash: false — URLs must match the site's extensionless
+        // serving; a slashed link would 404 on GitHub Pages.
+        const url = "https://blog.ithings.ch/writing/zz-rss-smoke";
+        expect(xml).not.toContain(`${url}/<`);
         expect(xml).toContain(`<link>${url}</link>`);
         expect(xml).toContain(`<guid isPermaLink="true">${url}</guid>`);
         expect(xml).toMatch(/<pubDate>[^<]+<\/pubDate>/);
