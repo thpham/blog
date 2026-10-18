@@ -1,9 +1,17 @@
 import mdx from "@astrojs/mdx";
 import { defineConfig, fontProviders } from "astro/config";
 import expressiveCode from "astro-expressive-code";
+import { fileURLToPath } from "node:url";
+import { demoUrls } from "./src/lib/demo";
 import { diagrams } from "./src/plugins/diagrams";
 
 const fontsource = fontProviders.fontsource();
+const sitemap = (await import("@astrojs/sitemap")).default;
+
+// The demo entries are invisible to machines (spec §9): never in the
+// sitemap. The filter reads the on-disk demo convention, the same source
+// the exclusions of the feeds and llms.txt use.
+const demo = demoUrls(fileURLToPath(new URL("./src/content", import.meta.url)));
 
 export default defineConfig({
   site: "https://blog.ithings.ch",
@@ -16,7 +24,7 @@ export default defineConfig({
   // files. Its options live in ec.config.mjs. `diagrams` renders Mermaid
   // and resolves Excalidraw sources at build time, ahead of Expressive Code
   // (src/plugins/diagrams.ts).
-  integrations: [diagrams(), expressiveCode(), mdx()],
+  integrations: [diagrams(), expressiveCode(), mdx(), sitemap({ filter: (page) => !demo.has(new URL(page).pathname) })],
   // Self-hosted at build time: files are downloaded from Fontsource and
   // served from /_astro/fonts, nothing is requested from a font CDN at runtime.
   fonts: [

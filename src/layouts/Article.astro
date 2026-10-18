@@ -22,6 +22,7 @@ import { isoDate, monthYear } from "../lib/format";
 import { entryUrl } from "../lib/ids";
 import { terrainFor } from "../lib/isolines";
 import type { WritingEntry } from "../lib/queries";
+import { postingJsonLd } from "../lib/seo";
 import Base from "./Base.astro";
 import "../styles/prose.css";
 
@@ -73,8 +74,16 @@ const elsewhere = [
 ];
 ---
 
-<Base title={data.title} description={data.description} lang={data.lang} noindex={data.demo}>
-  <article class="article">
+<Base
+  title={data.title}
+  description={data.description}
+  lang={data.lang}
+  noindex={data.demo}
+  ogImage={`/og/writing/${entry.id}.png`}
+  jsonLd={data.demo ? undefined : (postingJsonLd(entry) as Record<string, unknown>)}
+  alternates={translations.map((t) => ({ hreflang: t.data.lang, href: entryUrl("writing", t.id) }))}
+>
+  <article class="article" data-pagefind-ignore={data.demo ? "" : undefined}>
     <header class="article-head">
       <div class="wrap head">
         <div class="head-text">
@@ -178,7 +187,7 @@ const elsewhere = [
         )
       }
 
-      <div class="prose">
+      <div class="prose" data-pagefind-body={data.demo ? undefined : ""}>
         <Content components={{ Excalidraw, Figure, Slides }} />
       </div>
 

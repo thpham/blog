@@ -1,8 +1,7 @@
 ---
-import { Font } from "astro:assets";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
-import { SITE } from "../lib/site";
+import Meta from "../components/Meta.astro";
 import "../styles/global.css";
 
 type JsonLd = Record<string, unknown>;
@@ -19,30 +18,11 @@ interface Props {
   bodyAttrs?: Record<string, string | number | boolean | undefined>;
 }
 
-const {
-  title,
-  description,
-  lang = "en",
-  noindex = false,
-  ogImage,
-  jsonLd,
-  alternates = [],
-  bodyAttrs = {},
-} = Astro.props;
+const { title, description, lang = "en", noindex = false, ogImage, jsonLd, alternates = [], bodyAttrs = {} } = Astro.props;
 
-const site = Astro.site ?? new URL(SITE.url);
-const pathname = Astro.url.pathname
-  .replace(/\.html$/, "")
-  .replace(/(^|\/)index$/, "$1")
-  .replace(/(.)\/+$/, "$1");
-const canonical = new URL(pathname, site).href;
-const fullTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
-const image = ogImage ? new URL(ogImage, site).href : undefined;
-// Theme bootstrap (inline, first thing in <head>, before any stylesheet):
-// localStorage.theme holds the preference (auto | light | dark), <html
-// data-theme> gets the resolved theme and data-theme-pref the preference.
-// Without JS, tokens.css falls back to prefers-color-scheme.
-const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, "\\u003c") : undefined;
+// Analytics (spec §9): the GoatCounter script ships only when the counter's
+// code is set (GOATCOUNTER_CODE at build time) — unset, the site ships none.
+const goatcounter = process.env.GOATCOUNTER_CODE;
 ---
 
 <!doctype html>
@@ -50,6 +30,12 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, "\\u003c") : undefined;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      Theme bootstrap (inline, first thing in <head>, before any stylesheet):
+      localStorage.theme holds the preference (auto | light | dark), <html
+      data-theme> gets the resolved theme and data-theme-pref the preference.
+      Without JS, tokens.css falls back to prefers-color-scheme.
+    -->
     <script is:inline>
       (function () {
         var root = document.documentElement;
@@ -86,29 +72,25 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, "\\u003c") : undefined;
         };
       })();
     </script>
-    <title>{fullTitle}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, follow" />}
-    {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={new URL(a.href, site).href} />)}
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
-
-    <meta property="og:site_name" content={SITE.name} />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content={lang === "fr" ? "fr_FR" : "en_US"} />
-    {image && <meta property="og:image" content={image} />}
-    <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
-    <meta name="twitter:site" content={`@${SITE.socials.x}`} />
-
-    <Font cssVariable="--font-serif" preload={[{ style: "normal" }]} />
-    <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
-    <Font cssVariable="--font-mono" />
-
-    {ld && <script type="application/ld+json" set:html={ld} />}
+    <Meta
+      title={title}
+      description={description}
+      lang={lang}
+      noindex={noindex}
+      ogImage={ogImage}
+      jsonLd={jsonLd}
+      alternates={alternates}
+    />
+    {
+      goatcounter && (
+        <script
+          is:inline
+          async
+          data-goatcounter={`https://${goatcounter}.goatcounter.com/count`}
+          src="//gc.zgo.at/count.js"
+        />
+      )
+    }
   </head>
   <body {...bodyAttrs}>
     <a class="skip-link" href="#main" lang="en">Skip to content</a>

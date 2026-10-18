@@ -40,8 +40,14 @@ const TH = 300;
 const terrain = terrainFor(`lab/${entry.id}`, TW, TH);
 ---
 
-<Base title={data.title} description={data.intent} lang={data.lang} noindex={data.demo}>
-  <article class="article">
+<Base
+  title={data.title}
+  description={data.intent}
+  lang={data.lang}
+  noindex={data.demo}
+  ogImage={`/og/lab/${entry.id}.png`}
+>
+  <article class="article" data-pagefind-ignore={data.demo ? "" : undefined}>
     <header class="lab-head">
       <div class="wrap head">
         <div class="head-text">
@@ -108,7 +114,7 @@ const terrain = terrainFor(`lab/${entry.id}`, TW, TH);
         </aside>
       )}
 
-      <div class="prose">
+      <div class="prose" data-pagefind-body={data.demo ? undefined : ""}>
         <Content />
       </div>
 

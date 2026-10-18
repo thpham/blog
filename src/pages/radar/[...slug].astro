@@ -42,8 +42,9 @@ const terrain = terrainFor(`radar/${entry.id}`, TW, TH);
   description={`${data.name} — ${quadrant.label}, ring ${currentRing.toLowerCase()} on Thomas Pham's tech radar.`}
   lang={data.lang}
   noindex={data.demo}
+  ogImage={`/og/radar/${entry.id}.png`}
 >
-  <article class="article">
+  <article class="article" data-pagefind-ignore={data.demo ? "" : undefined}>
     <header class="radar-head">
       <div class="wrap head">
         <div class="head-text">
@@ -83,7 +84,7 @@ const terrain = terrainFor(`radar/${entry.id}`, TW, TH);
     </header>
 
     <div class="wrap article-body">
-      <div class="prose">
+      <div class="prose" data-pagefind-body={data.demo ? undefined : ""}>
         <Content />
       </div>
 
