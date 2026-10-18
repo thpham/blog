@@ -20,12 +20,18 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+      - name: Enable Corepack
+        # Before setup-node: its `cache: yarn` resolves `yarn` in the project
+        # right away, and without the shims the runner's yarn 1.22 refuses on
+        # packageManager ("yarn@4.18.0"). With corepack active, setup-node v7
+        # caches `yarn config get cacheFolder` for berry.
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: corepack enable && corepack prepare yarn@4.18.0 --activate
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: yarn
-      - name: Enable Corepack
-        run: corepack enable
 
       - name: Install dependencies
         run: yarn install --immutable
