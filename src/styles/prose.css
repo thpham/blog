@@ -8,16 +8,18 @@
  * Sans and the metadata in Plex Mono, so the three roles of the mockup are
  * kept: serif to read, sans to operate, mono to measure.
  *
- * Measure: widened on Thomas's checkpoint feedback — the page gives the
- * prose the room, so the text takes it: about 80 characters per line. The
- * --measure token (68ch) is right for the sans faces, but `ch` is the
- * width of "0", and Newsreader's average letter is much narrower than its
- * zero: 68ch of it sets about 90 characters. Measured on running English
- * text, a Newsreader character averages 0.39em, so 32em holds about 80.
+ * Measure: widened twice on Thomas's checkpoint feedback — the page gives
+ * the prose all the room left of the rail, so the text takes it (about 90
+ * characters per line; the cap of ~28em was left standing only for the
+ * classic 70-character guide). The --measure token (68ch) is right for the
+ * sans faces, but `ch` is the width of "0", and Newsreader's average
+ * letter is much narrower than its zero: 68ch of it sets about 90
+ * characters. Measured on running English text, a Newsreader character
+ * averages 0.39em, so 36em holds about 92.
  */
 
 .prose {
-  --prose-measure: 32em;
+  --prose-measure: 36em;
 
   max-width: var(--prose-measure);
   font-family: var(--font-serif);
