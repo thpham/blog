@@ -1,0 +1,130 @@
+---
+/**
+ * Static topographic field (spec §7.5), rendered at build time from the
+ * output of src/lib/isolines.ts. Contours are drawn in --iso, every fourth
+ * one (major) thicker; sources are accent nodes with a halo, joined by
+ * dashed accent links. Decorative: hidden from assistive technology.
+ *
+ * The viewBox is `0 0 width height` of the field the contours were computed
+ * on. Pass width/height when you have them; otherwise they are inferred from
+ * the contour coordinates.
+ */
+import type { Contour, Source } from "../lib/isolines";
+
+interface Props {
+  contours: Contour[];
+  sources?: Source[];
+  /** true: link consecutive sources; array: explicit pairs of source indices. */
+  links?: boolean | Array<[number, number]>;
+  width?: number;
+  height?: number;
+  /** Opacity of minor contours; majors get 1.8x, capped at 1. */
+  opacity?: number;
+  class?: string;
+}
+
+const {
+  contours,
+  sources = [],
+  links = true,
+  opacity = 0.42,
+  class: className,
+} = Astro.props;
+
+function extent(axis: 0 | 1): number {
+  let max = 0;
+  for (const c of contours) {
+    const nums = c.d.match(/-?\d+(?:\.\d+)?/g) ?? [];
+    for (let i = axis; i < nums.length; i += 2) max = Math.max(max, Number(nums[i]));
+  }
+  return Math.ceil(max);
+}
+
+const width = Astro.props.width ?? extent(0);
+const height = Astro.props.height ?? extent(1);
+
+const pairs: Array<[number, number]> =
+  links === true
+    ? sources.slice(1).map((_, i) => [i, i + 1])
+    : links === false
+      ? []
+      : links.filter(([a, b]) => sources[a] && sources[b]);
+
+const majorOpacity = Math.min(1, opacity * 1.8);
+---
+
+<svg
+  class:list={["isolines", className]}
+  viewBox={`0 0 ${width} ${height}`}
+  preserveAspectRatio="xMidYMid slice"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class="contours">
+    {
+      contours
+        .filter((c) => c.d)
+        .map((c) => (
+          <path
+            class:list={[{ major: c.major }]}
+            d={c.d}
+            stroke-width={c.major ? 1.1 : 0.55}
+            opacity={c.major ? majorOpacity : opacity}
+          />
+        ))
+    }
+  </g>
+  {
+    pairs.length > 0 && (
+      <g class="links">
+        {pairs.map(([a, b]) => (
+          <line x1={sources[a][0]} y1={sources[a][1]} x2={sources[b][0]} y2={sources[b][1]} />
+        ))}
+      </g>
+    )
+  }
+  {
+    sources.length > 0 && (
+      <g class="nodes">
+        {sources.map(([x, y]) => (
+          <>
+            <circle class="halo" cx={x} cy={y} r="8" />
+            <circle class="node" cx={x} cy={y} r="3.2" />
+          </>
+        ))}
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .isolines {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .contours path {
+    fill: none;
+    stroke: var(--iso);
+    stroke-linecap: round;
+  }
+
+  .links line {
+    stroke: var(--accent);
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+    opacity: 0.75;
+  }
+
+  .halo {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1;
+    opacity: 0.5;
+  }
+
+  .node {
+    fill: var(--accent);
+  }
+</style>

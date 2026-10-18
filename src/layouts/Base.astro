@@ -1,0 +1,121 @@
+---
+import { Font } from "astro:assets";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import { SITE } from "../lib/site";
+import "../styles/global.css";
+
+type JsonLd = Record<string, unknown>;
+
+interface Props {
+  title: string;
+  description: string;
+  lang?: "en" | "fr";
+  noindex?: boolean;
+  /** Absolute URL or site-relative path. */
+  ogImage?: string;
+  jsonLd?: JsonLd | JsonLd[];
+  alternates?: Array<{ hreflang: string; href: string }>;
+  bodyAttrs?: Record<string, string | number | boolean | undefined>;
+}
+
+const {
+  title,
+  description,
+  lang = "en",
+  noindex = false,
+  ogImage,
+  jsonLd,
+  alternates = [],
+  bodyAttrs = {},
+} = Astro.props;
+
+const site = Astro.site ?? new URL(SITE.url);
+const pathname = Astro.url.pathname
+  .replace(/\.html$/, "")
+  .replace(/(^|\/)index$/, "$1")
+  .replace(/(.)\/+$/, "$1");
+const canonical = new URL(pathname, site).href;
+const fullTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
+const image = ogImage ? new URL(ogImage, site).href : undefined;
+// Theme bootstrap (inline, first thing in <head>, before any stylesheet):
+// localStorage.theme holds the preference (auto | light | dark), <html
+// data-theme> gets the resolved theme and data-theme-pref the preference.
+// Without JS, tokens.css falls back to prefers-color-scheme.
+const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, "\\u003c") : undefined;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+        var pref = "auto";
+        function valid(v) {
+          return v === "light" || v === "dark" ? v : "auto";
+        }
+        function apply() {
+          root.dataset.theme = pref === "auto" ? (mq.matches ? "dark" : "light") : pref;
+          root.dataset.themePref = pref;
+        }
+        try {
+          pref = valid(localStorage.getItem("theme"));
+        } catch (e) {}
+        apply();
+        mq.addEventListener("change", function () {
+          if (pref === "auto") apply();
+        });
+        window.addEventListener("storage", function (e) {
+          if (e.key === "theme") {
+            pref = valid(e.newValue);
+            apply();
+          }
+        });
+        window.__ithingsTheme = {
+          set: function (next) {
+            pref = valid(next);
+            try {
+              localStorage.setItem("theme", pref);
+            } catch (e) {}
+            apply();
+          },
+        };
+      })();
+    </script>
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={new URL(a.href, site).href} />)}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === "fr" ? "fr_FR" : "en_US"} />
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
+    <meta name="twitter:site" content={`@${SITE.socials.x}`} />
+
+    <Font cssVariable="--font-serif" preload={[{ style: "normal" }]} />
+    <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-mono" />
+
+    {ld && <script type="application/ld+json" set:html={ld} />}
+  </head>
+  <body {...bodyAttrs}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

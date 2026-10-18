@@ -1,0 +1,100 @@
+/*
+ * Design tokens (spec §7.1). The light palette sits on bare :root; the dark
+ * palette is applied either by the theme script (data-theme="dark") or, when
+ * JavaScript never ran, by the system preference. Keep both dark blocks
+ * identical: tests/unit/contrast.test.ts checks it, and checks WCAG AA.
+ *
+ * Two light values are darker than §7.1, within the same hue and
+ * saturation, because the originals miss 4.5:1:
+ *   --accent  #a35f00 -> #975800  (4.44 -> 5.02 on bg, 4.06 -> 4.59 on surface)
+ *   --muted   #686d70 -> #64696c  (4.24 -> 4.50 on surface)
+ */
+
+:root {
+  color-scheme: light;
+
+  --bg: #f4f1ea;
+  --surface: #ebe7de;
+  --text: #16181a;
+  --muted: #64696c;
+  --line: #d6d1c6;
+  --accent: #975800;
+  --iso: #8f897b;
+  --ok: #3f8a4f;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0f1214;
+  --surface: #161b1e;
+  --text: #ece9e2;
+  --muted: #8d9699;
+  --line: #262c2f;
+  --accent: #f2b544;
+  --iso: #6f7c81;
+  --ok: #7fc98a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --bg: #0f1214;
+    --surface: #161b1e;
+    --text: #ece9e2;
+    --muted: #8d9699;
+    --line: #262c2f;
+    --accent: #f2b544;
+    --iso: #6f7c81;
+    --ok: #7fc98a;
+  }
+}
+
+/*
+ * Scale. Type and space are set in rem so they follow the reader's
+ * browser setting. The font families (--font-serif, --font-sans,
+ * --font-mono) are declared by Astro's <Font> component.
+ *
+ * Breakpoints (media queries cannot read custom properties):
+ *   40em  phone -> tablet: header goes to one row, footer to two columns
+ *   64em  tablet -> desktop: two-column layouts
+ */
+:root {
+  --fs-meta: 0.6875rem; /* 11px  mono metadata, eyebrows */
+  --fs-small: 0.8125rem; /* 13px */
+  --fs-ui: 0.875rem; /* 14px  navigation, controls */
+  --fs-body: 1.0625rem; /* 17px  running text */
+  --fs-lede: 1.1875rem; /* 19px */
+  --fs-title: 1.3125rem; /* 21px  list titles */
+  --fs-h2: clamp(1.625rem, 1.35rem + 1.1vw, 2.125rem);
+  --fs-display: clamp(2.375rem, 1.6rem + 3vw, 3.5rem);
+
+  --lh-display: 1.04;
+  --lh-title: 1.22;
+  --lh-body: 1.6;
+  --track-meta: 0.08em;
+
+  /* 4px base, roughly doubling past 1rem */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+  --s-10: 8rem;
+
+  --page-max: 75rem;
+  --gutter: clamp(1.25rem, 0.6rem + 3.2vw, 2.5rem);
+  --measure: 68ch;
+
+  --hairline: 1px solid var(--line);
+  --radius: 3px;
+  --radius-pill: 999px;
+
+  --dur: 140ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}

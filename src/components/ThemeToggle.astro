@@ -1,0 +1,82 @@
+---
+/**
+ * `auto · light · dark` switch. The selected state is drawn from
+ * <html data-theme-pref>, which the inline head script sets before first
+ * paint, so the pill never flashes the wrong choice. Without JavaScript the
+ * control cannot work and is hidden; the system preference then applies.
+ */
+const choices = ["auto", "light", "dark"] as const;
+---
+
+<div class="theme-toggle" role="group" aria-label="Colour theme">
+  {
+    choices.map((choice) => (
+      <button type="button" data-theme-choice={choice} aria-pressed="false">
+        {choice}
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  type Pref = "auto" | "light" | "dark";
+  const root = document.documentElement;
+  const buttons = document.querySelectorAll<HTMLButtonElement>("[data-theme-choice]");
+
+  function sync() {
+    const pref = root.dataset.themePref;
+    for (const b of buttons) b.setAttribute("aria-pressed", String(b.dataset.themeChoice === pref));
+  }
+
+  for (const b of buttons) {
+    b.addEventListener("click", () => window.__ithingsTheme?.set(b.dataset.themeChoice as Pref));
+  }
+  // Also catches changes made in another tab (storage event in the head script).
+  new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-theme-pref"] });
+  sync();
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    padding: 2px;
+    border: var(--hairline);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  :global(:root:not([data-theme-pref])) .theme-toggle {
+    display: none;
+  }
+
+  button {
+    appearance: none;
+    margin: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    padding: 0.36rem 0.62rem 0.38rem;
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+    transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  }
+
+  button:hover {
+    color: var(--text);
+  }
+
+  button:focus-visible {
+    outline-offset: 1px;
+    border-radius: var(--radius-pill);
+  }
+
+  :global(:root[data-theme-pref="auto"]) [data-theme-choice="auto"],
+  :global(:root[data-theme-pref="light"]) [data-theme-choice="light"],
+  :global(:root[data-theme-pref="dark"]) [data-theme-choice="dark"] {
+    background: var(--text);
+    color: var(--bg);
+  }
+</style>

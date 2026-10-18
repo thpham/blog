@@ -1,0 +1,70 @@
+---
+import { SITE, SOCIAL_URLS } from "../lib/site";
+
+const year = new Date().getFullYear();
+const links = [
+  { label: "RSS", href: "/rss.xml" },
+  { label: "GitHub", href: SOCIAL_URLS.github, rel: "me" },
+  { label: "LinkedIn", href: SOCIAL_URLS.linkedin, rel: "me" },
+  { label: "X", href: SOCIAL_URLS.x, rel: "me" },
+  { label: "Colophon", href: "/colophon" },
+];
+---
+
+<footer class="site-footer">
+  <div class="wrap bar">
+    <p class="copy">© {year} {SITE.author}</p>
+    <ul role="list" class="links">
+      {
+        links.map((link) => (
+          <li>
+            <a href={link.href} rel={link.rel}>
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: var(--hairline);
+    margin-top: var(--s-9);
+  }
+
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-4) var(--s-6);
+    padding-block: var(--s-6) var(--s-7);
+    font-family: var(--font-mono);
+    font-size: var(--fs-meta);
+    line-height: 1.4;
+    color: var(--muted);
+  }
+
+  .copy {
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-5);
+    letter-spacing: var(--track-meta);
+    text-transform: uppercase;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--text);
+  }
+</style>

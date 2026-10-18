@@ -1,11 +1,96 @@
 ---
+// Temporary home: exercises the base layout, type contrasts and the
+// isoline field until the real home page lands (Task 9).
+import Isolines from "../components/Isolines.astro";
+import Base from "../layouts/Base.astro";
+import { contourField, levels, terrainField, type Source } from "../lib/isolines";
+import { SITE } from "../lib/site";
+
+const W = 520;
+const H = 300;
+const sources: Source[] = [
+  [250, 120, 1, 70],
+  [400, 200, 0.75, 55],
+  [450, 60, 0.5, 40],
+  [140, 240, 0.45, 45],
+];
+const contours = contourField(terrainField(sources, 0), W, H, levels(0.06, 1.2, 0.065));
 ---
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>iThings</title>
-  </head>
-  <body>
-    <p>iThings blog — Astro skeleton placeholder.</p>
-  </body>
-</html>
+
+<Base
+  title={SITE.name}
+  description="Field notes by Thomas Pham on platforms, connected things and the AI woven through both."
+>
+  <section class="hero">
+    <div class="wrap grid">
+      <div class="txt">
+        <p class="eyebrow">{SITE.author} · {SITE.city}</p>
+        <h1 class="display">Field notes on the systems that <em>quietly</em> run everything.</h1>
+        <p class="intro">
+          Platforms, connected things and the AI now woven through both: tested in the lab, run in
+          production, written up with the trade-offs left in.
+        </p>
+      </div>
+      <div class="field">
+        <Isolines contours={contours} sources={sources} width={W} height={H} opacity={0.4} />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    border-bottom: var(--hairline);
+  }
+
+  /* The field is bounded by the two hairlines, never cut in mid-air. */
+  .grid {
+    display: grid;
+  }
+
+  .txt {
+    padding-block: var(--s-8) var(--s-7);
+  }
+
+  .eyebrow {
+    margin-bottom: var(--s-4);
+  }
+
+  h1 {
+    max-width: 16ch;
+    margin-bottom: var(--s-5);
+  }
+
+  .intro {
+    max-width: 30rem;
+    font-size: var(--fs-lede);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  .field {
+    aspect-ratio: 520 / 300;
+    margin-inline: calc(-1 * var(--gutter));
+    border-top: var(--hairline);
+  }
+
+  @media (min-width: 64em) {
+    .grid {
+      grid-template-columns: 1.1fr 1fr;
+      column-gap: var(--s-6);
+    }
+
+    .txt {
+      align-self: center;
+      padding-block: var(--s-8);
+    }
+
+    .field {
+      aspect-ratio: auto;
+      min-height: 22rem;
+      margin-inline: 0 calc(-1 * var(--gutter));
+      border-top: 0;
+      border-inline: var(--hairline);
+    }
+  }
+</style>
